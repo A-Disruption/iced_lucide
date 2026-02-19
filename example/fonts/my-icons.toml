@@ -1,0 +1,9 @@
+module = "icon"
+
+[icons]
+edit   = "pencil"
+save   = "save"
+trash  = "trash-2"
+search = "search"
+home   = "house"
+settings = "settings"

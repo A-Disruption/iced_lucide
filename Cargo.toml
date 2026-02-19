@@ -1,0 +1,19 @@
+[package]
+name = "iced_lucide"
+version = "0.1.0"
+edition = "2024"
+description = "Generate type-safe Lucide icon fonts for `iced` at compile time"
+license = "MIT"
+categories = ["gui"]
+keywords = ["gui", "ui", "iced", "icons", "lucide"]
+
+[dependencies]
+sha2 = "0.10"
+serde = { version = "1", features = ["derive"] }
+toml = "0.9"
+
+[workspace]
+members = ["example"]
+
+[workspace.dependencies]
+iced_lucide = { version = "0.1.0", path = "." }
