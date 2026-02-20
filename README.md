@@ -25,7 +25,7 @@ Add `iced_lucide` to your `build-dependencies`:
 
 ```toml
 [build-dependencies]
-iced_lucide = { git = "https://github.com/YOUR_USERNAME/iced_lucide" }
+iced_lucide = { git = "https://github.com/A-Disruption/iced_lucide" }
 ```
 
 Call `build` in your `build.rs`:
