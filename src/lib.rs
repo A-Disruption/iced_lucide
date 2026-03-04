@@ -390,7 +390,14 @@ fn subset_font(codepoints: &[u32]) -> Vec<u8> {
 
     // Re-inject a cmap so iced can look up glyphs by Unicode codepoint.
     let cmap = build_cmap(&mut cp_to_new_gid);
-    inject_table(&subset_data, b"cmap", &cmap)
+    let with_cmap = inject_table(&subset_data, b"cmap", &cmap);
+
+    // Preserve the name table from the original font so Lucide's license
+    // metadata is carried over into the subset (subsetter removes it).
+    match extract_table(FONT_BYTES, b"name") {
+        Some(name_data) => inject_table(&with_cmap, b"name", &name_data),
+        None => with_cmap,
+    }
 }
 
 /// Build a cmap table (format 12) mapping codepoints → new glyph IDs.
@@ -429,6 +436,29 @@ fn build_cmap(entries: &mut Vec<(u32, u16)>) -> Vec<u8> {
     }
 
     cmap
+}
+
+/// Extract a named table's raw bytes from an OpenType font binary.
+fn extract_table(font: &[u8], tag: &[u8; 4]) -> Option<Vec<u8>> {
+    if font.len() < 12 {
+        return None;
+    }
+    let num_tables = u16::from_be_bytes([font[4], font[5]]) as usize;
+    for i in 0..num_tables {
+        let base = 12 + i * 16;
+        if base + 16 > font.len() {
+            break;
+        }
+        let t: [u8; 4] = font[base..base + 4].try_into().ok()?;
+        if &t == tag {
+            let offset =
+                u32::from_be_bytes(font[base + 8..base + 12].try_into().ok()?) as usize;
+            let length =
+                u32::from_be_bytes(font[base + 12..base + 16].try_into().ok()?) as usize;
+            return font.get(offset..offset + length).map(|d| d.to_vec());
+        }
+    }
+    None
 }
 
 /// Inject (or replace) a named table in an OpenType font binary.
@@ -607,6 +637,7 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
     out.push_str(
         "/// All icons as `(name, codepoint_str)` pairs.\n\
          /// Use this to populate an icon-picker widget.\n\
+         #[allow(dead_code)]\n\
          pub const ALL_ICONS: &[(&str, &str)] = &[\n",
     );
     for (name, code) in icons {
