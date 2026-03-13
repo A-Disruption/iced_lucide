@@ -661,7 +661,7 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
          ///     button(render(cp)).on_press(Msg::Pick(name.to_string()))\n\
          /// }\n\
          /// ```\n\
-         pub fn render(codepoint: &str) -> Text<'_> {\n    text(codepoint).font(Font::with_name(\"lucide\"))\n}\n\n",
+         pub fn render(codepoint: &str) -> Text<'_> {\n    text(codepoint).font(Font::with_family(\"lucide\"))\n}\n\n",
     );
 
     // Private helper used by typed icon functions
