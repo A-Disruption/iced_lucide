@@ -628,7 +628,6 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
         "// Generated automatically by iced_lucide at build time.\n\
          // Do not edit manually.\n\
          // {hash}\n\
-         use iced::Font;\n\
          use iced::widget::text::{{self, Text}};\n\n\
          pub const FONT: &[u8] = include_bytes!(\"{ttf_path}\");\n\n"
     ));
@@ -665,7 +664,7 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
          /// ```\n\
          pub fn render<'a, Theme>(codepoint: &'a str) -> Text<'a, Theme>\n\
          where\n    Theme: text::Catalog + 'a,\n\
-         {\n    Text::new(codepoint).font(Font::new(\"lucide\"))\n}\n\n",
+         {\n    Text::new(codepoint).font(\"lucide\")\n}\n\n",
     );
 
     // Private helper used by typed icon functions
