@@ -629,7 +629,7 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
          // Do not edit manually.\n\
          // {hash}\n\
          use iced::Font;\n\
-         use iced::widget::{{Text, text}};\n\n\
+         use iced::widget::text::{{self, Text}};\n\n\
          pub const FONT: &[u8] = include_bytes!(\"{ttf_path}\");\n\n"
     ));
 
@@ -648,7 +648,9 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
     // One typed function per icon
     for (name, code) in icons {
         out.push_str(&format!(
-            "pub fn {name}<'a>() -> Text<'a> {{\n    icon(\"\\u{{{code:X}}}\")\n}}\n\n"
+            "pub fn {name}<'a, Theme>() -> Text<'a, Theme>\n\
+             where\n    Theme: text::Catalog + 'a,\n\
+             {{\n    icon(\"\\u{{{code:X}}}\")\n}}\n\n"
         ));
     }
 
@@ -661,12 +663,16 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
          ///     button(render(cp)).on_press(Msg::Pick(name.to_string()))\n\
          /// }\n\
          /// ```\n\
-         pub fn render(codepoint: &str) -> Text<'_> {\n    text(codepoint).font(Font::with_family(\"lucide\"))\n}\n\n",
+         pub fn render<'a, Theme>(codepoint: &'a str) -> Text<'a, Theme>\n\
+         where\n    Theme: text::Catalog + 'a,\n\
+         {\n    Text::new(codepoint).font(Font::new(\"lucide\"))\n}\n\n",
     );
 
     // Private helper used by typed icon functions
     out.push_str(
-        "fn icon(codepoint: &str) -> Text<'_> {\n    render(codepoint)\n}\n",
+        "fn icon<'a, Theme>(codepoint: &'a str) -> Text<'a, Theme>\n\
+         where\n    Theme: text::Catalog + 'a,\n\
+         {\n    render(codepoint)\n}\n",
     );
 
     out
