@@ -42,6 +42,26 @@
 //!
 //! This generates `src/icon.rs` and copies `lucide.ttf` next to your TOML.
 //!
+//! ## Custom output paths
+//!
+//! By default the generated module is written to `src/<module>.rs` and the
+//! subsetted TTF sits next to the TOML. Both destinations can be overridden
+//! with optional fields, which is useful for Cargo examples or any layout
+//! where the generated module is not a member of `src/`:
+//!
+//! ```toml
+//! module        = "icon"
+//! module_target = "examples/playground/icon.rs"
+//! ttf_target    = "examples/playground/fonts/lucide.ttf"
+//!
+//! [icons]
+//! edit = "pencil"
+//! ```
+//!
+//! Both paths are resolved relative to the crate root (i.e. the directory
+//! containing `Cargo.toml`). The generated `include_bytes!` call is rewritten
+//! to match the relative distance between the two locations.
+//!
 //! Finally, register the font in your application and use the generated
 //! functions:
 //!
@@ -173,20 +193,32 @@ pub fn build(path: impl AsRef<Path>) -> Result<(), Error> {
 
     let hash = compute_hash(&icons);
 
-    let module_depth = definition.module.split("::").count();
-    let module_target = PathBuf::from("src")
-        .join(definition.module.replace("::", "/"))
-        .with_extension("rs");
+    // Resolve the destination for the generated `.rs` module. A custom
+    // `module_target` wins over the historical `src/<module>.rs` default.
+    let module_target = definition.module_target.clone().unwrap_or_else(|| {
+        PathBuf::from("src")
+            .join(definition.module.replace("::", "/"))
+            .with_extension("rs")
+    });
 
-    // Tell Cargo to re-run if the generated file is missing or modified.
+    // Resolve the destination for the subsetted TTF. A custom `ttf_target`
+    // wins; otherwise the font is written next to the TOML, matching the
+    // legacy behavior of previous releases.
+    let ttf_target = definition
+        .ttf_target
+        .clone()
+        .unwrap_or_else(|| path.with_file_name("lucide.ttf"));
+
+    // Tell Cargo to re-run if either output is missing or modified.
     println!("cargo::rerun-if-changed={}", module_target.display());
+    println!("cargo::rerun-if-changed={}", ttf_target.display());
 
-    // Relative path from the generated module back to the project root
-    let rel_root: PathBuf = std::iter::repeat("../").take(module_depth).collect::<String>().into();
-
-    // TTF lives next to the TOML
-    let ttf_target = path.with_file_name("lucide.ttf");
-    let ttf_rel = rel_root.join(&ttf_target);
+    // Compute the path from the generated module's directory to the TTF.
+    // Both inputs are relative to the crate root, so `relative_from` will
+    // emit a correct `../..`-prefixed include path regardless of how deep
+    // either destination is nested.
+    let module_dir = module_target.parent().unwrap_or_else(|| Path::new(""));
+    let ttf_rel = relative_from(module_dir, &ttf_target);
 
     let existing = fs::read_to_string(&module_target).unwrap_or_default();
     let existing_hash = existing
@@ -200,18 +232,86 @@ pub fn build(path: impl AsRef<Path>) -> Result<(), Error> {
         let codepoints: Vec<u32> = icons.values().copied().collect();
         let font_data = subset_font(&codepoints);
 
+        if let Some(dir) = ttf_target.parent().filter(|p| !p.as_os_str().is_empty()) {
+            fs::create_dir_all(dir)
+                .unwrap_or_else(|e| panic!("Create TTF directory {}: {e}", dir.display()));
+        }
         fs::write(&ttf_target, &font_data)
             .unwrap_or_else(|e| panic!("Write lucide.ttf to {}: {e}", ttf_target.display()));
 
         let module = generate_module(&icons, &hash, ttf_rel.to_string_lossy().replace('\\', "/"));
 
-        if let Some(dir) = module_target.parent() {
-            fs::create_dir_all(dir).expect("Create src directory");
+        if let Some(dir) = module_target.parent().filter(|p| !p.as_os_str().is_empty()) {
+            fs::create_dir_all(dir)
+                .unwrap_or_else(|e| panic!("Create module directory {}: {e}", dir.display()));
         }
         fs::write(&module_target, module).expect("Write icon module");
     }
 
     Ok(())
+}
+
+/// Compute the relative path from `base` to `target`.
+///
+/// Both arguments are treated as relative paths rooted at the same common
+/// ancestor (typically the crate root during a `build.rs` invocation). The
+/// returned path is the shortest sequence of `..` and forward components
+/// that, when joined onto `base`, yields `target`.
+///
+/// - Leading `./` components are stripped.
+/// - Inputs containing `..` are left unnormalized above the common prefix.
+///   This helper is only intended for simple downward paths like
+///   `examples/playground/icon.rs` ↔ `examples/playground/fonts/lucide.ttf`.
+///
+/// # Examples
+///
+/// ```ignore
+/// // sibling directories
+/// relative_from(Path::new("src"), Path::new("fonts/lucide.ttf"))
+///     == PathBuf::from("../fonts/lucide.ttf");
+///
+/// // nested target under a shared prefix
+/// relative_from(
+///     Path::new("examples/playground"),
+///     Path::new("examples/playground/fonts/lucide.ttf"),
+/// ) == PathBuf::from("fonts/lucide.ttf");
+/// ```
+fn relative_from(base: &Path, target: &Path) -> PathBuf {
+    fn components(path: &Path) -> Vec<&std::ffi::OsStr> {
+        path.components()
+            .filter_map(|c| match c {
+                std::path::Component::Normal(part) => Some(part),
+                // Drop leading `./` segments; leave everything else alone.
+                std::path::Component::CurDir => None,
+                std::path::Component::ParentDir
+                | std::path::Component::RootDir
+                | std::path::Component::Prefix(_) => Some(c.as_os_str()),
+            })
+            .collect()
+    }
+
+    let base_parts = components(base);
+    let target_parts = components(target);
+
+    // Skip the shared prefix.
+    let mut i = 0;
+    while i < base_parts.len() && i < target_parts.len() && base_parts[i] == target_parts[i] {
+        i += 1;
+    }
+
+    let mut out = PathBuf::new();
+    for _ in i..base_parts.len() {
+        out.push("..");
+    }
+    for part in &target_parts[i..] {
+        out.push(part);
+    }
+
+    if out.as_os_str().is_empty() {
+        PathBuf::from(".")
+    } else {
+        out
+    }
 }
 
 /// Generate a module containing **every** Lucide icon.
@@ -313,7 +413,30 @@ pub enum Error {}
 
 #[derive(Debug, Clone, Deserialize)]
 struct Definition {
+    /// Rust module path for the generated helper functions.
+    ///
+    /// Used as the `mod` name at call sites and — unless [`module_target`]
+    /// is set — as the destination filename under `src/`.
+    ///
+    /// [`module_target`]: Definition::module_target
     module: String,
+    /// Optional custom destination for the generated `.rs` file.
+    ///
+    /// When present, the path is taken verbatim (relative to the crate
+    /// root / `CARGO_MANIFEST_DIR`) and parent directories are created
+    /// automatically. When absent, the default `src/<module>.rs` layout is
+    /// used, preserving backwards compatibility.
+    #[serde(default)]
+    module_target: Option<PathBuf>,
+    /// Optional custom destination for the generated `lucide.ttf`.
+    ///
+    /// When present, the subsetted font is written to this path (relative
+    /// to the crate root) and the `include_bytes!` call inside the
+    /// generated module is rewritten accordingly. When absent the TTF is
+    /// placed next to the TOML definition, matching the historical
+    /// behavior.
+    #[serde(default)]
+    ttf_target: Option<PathBuf>,
     icons: BTreeMap<String, String>,
 }
 
@@ -628,8 +751,7 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
         "// Generated automatically by iced_lucide at build time.\n\
          // Do not edit manually.\n\
          // {hash}\n\
-         use iced::Font;\n\
-         use iced::widget::{{Text, text}};\n\n\
+         use iced::widget::text::{{self, Text}};\n\n\
          pub const FONT: &[u8] = include_bytes!(\"{ttf_path}\");\n\n"
     ));
 
@@ -648,7 +770,9 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
     // One typed function per icon
     for (name, code) in icons {
         out.push_str(&format!(
-            "pub fn {name}<'a>() -> Text<'a> {{\n    icon(\"\\u{{{code:X}}}\")\n}}\n\n"
+            "pub fn {name}<'a, Theme>() -> Text<'a, Theme>\n\
+             where\n    Theme: text::Catalog + 'a,\n\
+             {{\n    icon(\"\\u{{{code:X}}}\")\n}}\n\n"
         ));
     }
 
@@ -661,12 +785,16 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
          ///     button(render(cp)).on_press(Msg::Pick(name.to_string()))\n\
          /// }\n\
          /// ```\n\
-         pub fn render(codepoint: &str) -> Text<'_> {\n    text(codepoint).font(Font::with_name(\"lucide\"))\n}\n\n",
+         pub fn render<'a, Theme>(codepoint: &'a str) -> Text<'a, Theme>\n\
+         where\n    Theme: text::Catalog + 'a,\n\
+         {\n    Text::new(codepoint).font(\"lucide\")\n}\n\n",
     );
 
     // Private helper used by typed icon functions
     out.push_str(
-        "fn icon(codepoint: &str) -> Text<'_> {\n    render(codepoint)\n}\n",
+        "fn icon<'a, Theme>(codepoint: &'a str) -> Text<'a, Theme>\n\
+         where\n    Theme: text::Catalog + 'a,\n\
+         {\n    render(codepoint)\n}\n",
     );
 
     out
@@ -726,6 +854,120 @@ mod tests {
         let mut sorted = names.clone();
         sorted.sort();
         assert_eq!(names, sorted);
+    }
+
+    #[test]
+    fn definition_parses_without_custom_paths() {
+        let src = r#"
+            module = "icon"
+            [icons]
+            edit = "pencil"
+        "#;
+        let def: Definition = toml::from_str(src).expect("parse");
+        assert_eq!(def.module, "icon");
+        assert!(def.module_target.is_none());
+        assert!(def.ttf_target.is_none());
+        assert_eq!(def.icons.get("edit").map(String::as_str), Some("pencil"));
+    }
+
+    #[test]
+    fn definition_parses_with_custom_paths() {
+        let src = r#"
+            module        = "icon"
+            module_target = "examples/playground/icon.rs"
+            ttf_target    = "examples/playground/fonts/lucide.ttf"
+            [icons]
+            edit = "pencil"
+        "#;
+        let def: Definition = toml::from_str(src).expect("parse");
+        assert_eq!(
+            def.module_target,
+            Some(PathBuf::from("examples/playground/icon.rs"))
+        );
+        assert_eq!(
+            def.ttf_target,
+            Some(PathBuf::from("examples/playground/fonts/lucide.ttf"))
+        );
+    }
+
+    #[test]
+    fn relative_from_sibling_directories() {
+        // module in src/, font in fonts/ → "../fonts/lucide.ttf"
+        assert_eq!(
+            relative_from(Path::new("src"), Path::new("fonts/lucide.ttf")),
+            PathBuf::from("../fonts/lucide.ttf")
+        );
+    }
+
+    #[test]
+    fn relative_from_shared_prefix() {
+        // module + ttf under the same examples/playground/ parent
+        assert_eq!(
+            relative_from(
+                Path::new("examples/playground"),
+                Path::new("examples/playground/fonts/lucide.ttf"),
+            ),
+            PathBuf::from("fonts/lucide.ttf")
+        );
+    }
+
+    #[test]
+    fn relative_from_nested_module_to_root_ttf() {
+        // src/icons/foo.rs ↔ lucide.ttf at root
+        assert_eq!(
+            relative_from(Path::new("src/icons"), Path::new("lucide.ttf")),
+            PathBuf::from("../../lucide.ttf")
+        );
+    }
+
+    #[test]
+    fn relative_from_deep_module_to_deep_ttf() {
+        // examples/playground/src/icon.rs ↔ assets/fonts/lucide.ttf
+        assert_eq!(
+            relative_from(
+                Path::new("examples/playground/src"),
+                Path::new("assets/fonts/lucide.ttf"),
+            ),
+            PathBuf::from("../../../assets/fonts/lucide.ttf")
+        );
+    }
+
+    #[test]
+    fn relative_from_identical_directories() {
+        // module.parent() == ttf.parent() → same directory
+        assert_eq!(
+            relative_from(
+                Path::new("examples/playground"),
+                Path::new("examples/playground/lucide.ttf"),
+            ),
+            PathBuf::from("lucide.ttf")
+        );
+    }
+
+    #[test]
+    fn relative_from_empty_base() {
+        // An empty base (module at crate root) just returns the target.
+        assert_eq!(
+            relative_from(Path::new(""), Path::new("fonts/lucide.ttf")),
+            PathBuf::from("fonts/lucide.ttf")
+        );
+    }
+
+    #[test]
+    fn relative_from_strips_leading_cur_dir() {
+        assert_eq!(
+            relative_from(Path::new("./src"), Path::new("./fonts/lucide.ttf")),
+            PathBuf::from("../fonts/lucide.ttf")
+        );
+    }
+
+    #[test]
+    fn relative_from_identical_paths_returns_dot() {
+        // Same location → "." (not an empty PathBuf).
+        assert_eq!(
+            relative_from(Path::new("src/foo"), Path::new("src/foo")),
+            PathBuf::from(".")
+        );
     }
 
     #[test]

@@ -39,6 +39,32 @@ pub fn main() {
 
 This generates `src/icon.rs` and copies `lucide.ttf` next to your TOML.
 
+### Custom output paths
+
+By default the generated module is written to `src/<module>.rs` and the
+subsetted TTF lives next to the TOML. Both destinations can be overridden
+with two optional fields, which is handy for Cargo examples, multi-file
+layouts, or anywhere the generated module is not a member of `src/`:
+
+```toml
+# examples/playground/fonts/icons.toml
+module        = "icon"
+module_target = "examples/playground/icon.rs"
+ttf_target    = "examples/playground/fonts/lucide.ttf"
+
+[icons]
+edit = "pencil"
+save = "save"
+```
+
+Both paths are resolved relative to the crate root (the directory
+containing `Cargo.toml`). `iced_lucide` creates parent directories as
+needed and rewrites the `include_bytes!` call inside the generated module
+so the relative distance between the two locations is correct.
+
+Leaving either field out keeps the historical default, so existing
+consumers don't need to change anything.
+
 Register the font and use the generated functions:
 
 ```rust
