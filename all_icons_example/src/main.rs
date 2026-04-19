@@ -1,7 +1,7 @@
 mod icon;
 
-use iced::widget::{button, container, scrollable, text, tooltip, Row};
 use iced::Element;
+use iced::widget::{Row, button, container, scrollable, text, tooltip};
 
 use crate::icon::ALL_ICONS;
 
@@ -36,7 +36,9 @@ impl Example {
                 tooltip(
                     button(icon::render(codepoint))
                         .on_press(Message::IconSelected(name.to_string())),
-                    container(text(*name)).style(container::bordered_box).padding(5),
+                    container(text(*name))
+                        .style(container::bordered_box)
+                        .padding(5),
                     tooltip::Position::Top,
                 )
                 .into()
