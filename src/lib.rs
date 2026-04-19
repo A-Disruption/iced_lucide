@@ -653,24 +653,47 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
     // One typed function per icon
     for (name, code) in icons {
         out.push_str(&format!(
-            "pub fn {name}<'a>() -> Text<'a> {{\n    icon(\"\\u{{{code:X}}}\")\n}}\n\n"
+            "\
+pub fn {name}<'a, Theme, Renderer>() -> Text<'a, Theme, Renderer>
+where
+    Theme: iced::widget::text::Catalog + 'a,
+    Renderer: iced::advanced::text::Renderer<Font = Font>,
+{{
+    icon(\"\\u{{{code:X}}}\")
+}}\n\n"
         ));
     }
 
     // Public render helper — for use with ALL_ICONS in picker widgets
     out.push_str(
-        "/// Render any Lucide icon by its codepoint string.\n\
-         /// Use this together with [`ALL_ICONS`] to display icons dynamically:\n\
-         /// ```ignore\n\
-         /// for (name, cp) in ALL_ICONS {\n\
-         ///     button(render(cp)).on_press(Msg::Pick(name.to_string()))\n\
-         /// }\n\
-         /// ```\n\
-         pub fn render(codepoint: &str) -> Text<'_> {\n    text(codepoint).font(Font::new(\"lucide\"))\n}\n\n",
+        "\
+/// Render any Lucide icon by its codepoint string.
+/// Use this together with [`ALL_ICONS`] to display icons dynamically:
+/// ```ignore
+/// for (name, cp) in ALL_ICONS {
+///     button(render(cp)).on_press(Msg::Pick(name.to_string()))
+///
+/// ```
+pub fn render<'a, Theme, Renderer>(codepoint: &'a str) -> Text<'a, Theme, Renderer>
+where
+    Theme: iced::widget::text::Catalog + 'a,
+    Renderer: iced::advanced::text::Renderer<Font = Font>,
+{
+    text(codepoint).font(Font::new(\"lucide\"))
+}\n\n",
     );
 
     // Private helper used by typed icon functions
-    out.push_str("fn icon(codepoint: &str) -> Text<'_> {\n    render(codepoint)\n}\n");
+    out.push_str(
+        "\
+fn icon<'a, Theme, Renderer>(codepoint: &'a str) -> Text<'a, Theme, Renderer>
+where
+    Theme: iced::widget::text::Catalog + 'a,
+    Renderer: iced::advanced::text::Renderer<Font = Font>,
+{
+    render(codepoint)
+}\n",
+    );
 
     out
 }
