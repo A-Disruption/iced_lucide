@@ -1,7 +1,7 @@
 mod icon;
 
-use iced::widget::{row};
 use iced::Element;
+use iced::widget::row;
 
 fn main() -> iced::Result {
     iced::application(Example::default, Example::update, Example::view)
