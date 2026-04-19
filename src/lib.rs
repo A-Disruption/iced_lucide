@@ -182,7 +182,10 @@ pub fn build(path: impl AsRef<Path>) -> Result<(), Error> {
     println!("cargo::rerun-if-changed={}", module_target.display());
 
     // Relative path from the generated module back to the project root
-    let rel_root: PathBuf = std::iter::repeat("../").take(module_depth).collect::<String>().into();
+    let rel_root: PathBuf = std::iter::repeat("../")
+        .take(module_depth)
+        .collect::<String>()
+        .into();
 
     // TTF lives next to the TOML
     let ttf_target = path.with_file_name("lucide.ttf");
@@ -246,7 +249,10 @@ pub fn build_all(module_name: &str) -> Result<(), Error> {
     // Tell Cargo to re-run if the generated file is missing or modified.
     println!("cargo::rerun-if-changed={}", module_target.display());
 
-    let rel_root: PathBuf = std::iter::repeat("../").take(module_depth).collect::<String>().into();
+    let rel_root: PathBuf = std::iter::repeat("../")
+        .take(module_depth)
+        .collect::<String>()
+        .into();
 
     // TTF written to fonts/lucide.ttf
     let ttf_dir = PathBuf::from("fonts");
@@ -262,8 +268,7 @@ pub fn build_all(module_name: &str) -> Result<(), Error> {
         .trim_start_matches("// ");
 
     if hash != existing_hash || !ttf_target.exists() {
-        fs::write(&ttf_target, FONT_BYTES)
-            .unwrap_or_else(|e| panic!("Write lucide.ttf: {e}"));
+        fs::write(&ttf_target, FONT_BYTES).unwrap_or_else(|e| panic!("Write lucide.ttf: {e}"));
 
         let module = generate_module(
             &all_icons,
@@ -360,8 +365,7 @@ fn parse_icons() -> HashMap<String, u32> {
 /// so the result works as a standalone screen font (subsetter removes cmap because
 /// it targets PDF embedding, which provides its own cmap).
 fn subset_font(codepoints: &[u32]) -> Vec<u8> {
-    let face = ttf_parser::Face::parse(FONT_BYTES, 0)
-        .expect("Parse bundled lucide.ttf");
+    let face = ttf_parser::Face::parse(FONT_BYTES, 0).expect("Parse bundled lucide.ttf");
 
     // GlyphRemapper::new() already includes .notdef (glyph 0).
     let mut remapper = subsetter::GlyphRemapper::new();
@@ -416,17 +420,17 @@ fn build_cmap(entries: &mut Vec<(u32, u16)>) -> Vec<u8> {
     cmap.extend_from_slice(&1u16.to_be_bytes()); // numTables
 
     // Encoding record: Windows / Unicode full repertoire (platformID=3, encodingID=10)
-    cmap.extend_from_slice(&3u16.to_be_bytes());  // platformID
+    cmap.extend_from_slice(&3u16.to_be_bytes()); // platformID
     cmap.extend_from_slice(&10u16.to_be_bytes()); // encodingID
     // Offset from start of cmap table to subtable: header(4) + record(8) = 12
     cmap.extend_from_slice(&12u32.to_be_bytes());
 
     // Subtable (format 12)
-    cmap.extend_from_slice(&12u16.to_be_bytes());        // format
-    cmap.extend_from_slice(&0u16.to_be_bytes());         // reserved
+    cmap.extend_from_slice(&12u16.to_be_bytes()); // format
+    cmap.extend_from_slice(&0u16.to_be_bytes()); // reserved
     cmap.extend_from_slice(&subtable_len.to_be_bytes()); // length
-    cmap.extend_from_slice(&0u32.to_be_bytes());         // language
-    cmap.extend_from_slice(&n.to_be_bytes());            // numGroups
+    cmap.extend_from_slice(&0u32.to_be_bytes()); // language
+    cmap.extend_from_slice(&n.to_be_bytes()); // numGroups
 
     // One SequentialMapGroup per codepoint (startCharCode = endCharCode = cp)
     for &(cp, gid) in entries.iter() {
@@ -451,10 +455,8 @@ fn extract_table(font: &[u8], tag: &[u8; 4]) -> Option<Vec<u8>> {
         }
         let t: [u8; 4] = font[base..base + 4].try_into().ok()?;
         if &t == tag {
-            let offset =
-                u32::from_be_bytes(font[base + 8..base + 12].try_into().ok()?) as usize;
-            let length =
-                u32::from_be_bytes(font[base + 12..base + 16].try_into().ok()?) as usize;
+            let offset = u32::from_be_bytes(font[base + 8..base + 12].try_into().ok()?) as usize;
+            let length = u32::from_be_bytes(font[base + 12..base + 16].try_into().ok()?) as usize;
             return font.get(offset..offset + length).map(|d| d.to_vec());
         }
     }
@@ -498,7 +500,11 @@ fn inject_table(font: &[u8], tag: &[u8; 4], table_data: &[u8]) -> Vec<u8> {
 /// Rebuild a complete OpenType font binary from a sorted table list.
 fn reconstruct_otf(flavor: u32, tables: &[([u8; 4], Vec<u8>)]) -> Vec<u8> {
     let n = tables.len() as u16;
-    let entry_selector = if n > 0 { (n as f64).log2().floor() as u16 } else { 0 };
+    let entry_selector = if n > 0 {
+        (n as f64).log2().floor() as u16
+    } else {
+        0
+    };
     let search_range = 2u16.pow(u32::from(entry_selector)) * 16;
     let range_shift = n * 16 - search_range;
 
@@ -589,12 +595,11 @@ fn otf_checksum(data: &[u8]) -> u32 {
 fn sanitize_fn_name(name: &str) -> String {
     // Strict and reserved keywords in all Rust editions.
     const KEYWORDS: &[&str] = &[
-        "abstract", "as", "async", "await", "become", "box", "break", "const",
-        "continue", "crate", "do", "dyn", "else", "enum", "extern", "false", "final",
-        "fn", "for", "if", "impl", "in", "let", "loop", "macro", "match", "mod",
-        "move", "mut", "override", "priv", "pub", "ref", "return", "self", "static",
-        "struct", "super", "trait", "true", "try", "type", "typeof", "unsafe",
-        "unsized", "use", "virtual", "where", "while", "yield",
+        "abstract", "as", "async", "await", "become", "box", "break", "const", "continue", "crate",
+        "do", "dyn", "else", "enum", "extern", "false", "final", "fn", "for", "if", "impl", "in",
+        "let", "loop", "macro", "match", "mod", "move", "mut", "override", "priv", "pub", "ref",
+        "return", "self", "static", "struct", "super", "trait", "true", "try", "type", "typeof",
+        "unsafe", "unsized", "use", "virtual", "where", "while", "yield",
     ];
 
     let mut s = name.replace('-', "_");
@@ -661,13 +666,11 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
          ///     button(render(cp)).on_press(Msg::Pick(name.to_string()))\n\
          /// }\n\
          /// ```\n\
-         pub fn render(codepoint: &str) -> Text<'_> {\n    text(codepoint).font(Font::with_name(\"lucide\"))\n}\n\n",
+         pub fn render(codepoint: &str) -> Text<'_> {\n    text(codepoint).font(Font::new(\"lucide\"))\n}\n\n",
     );
 
     // Private helper used by typed icon functions
-    out.push_str(
-        "fn icon(codepoint: &str) -> Text<'_> {\n    render(codepoint)\n}\n",
-    );
+    out.push_str("fn icon(codepoint: &str) -> Text<'_> {\n    render(codepoint)\n}\n");
 
     out
 }
