@@ -191,7 +191,7 @@ pub fn build(path: impl AsRef<Path>) -> Result<(), Error> {
         })
         .collect();
 
-    let hash = compute_hash(&icons);
+    let hash = compute_hash(&icons, definition.family.as_deref());
 
     // Resolve the destination for the generated `.rs` module. A custom
     // `module_target` wins over the historical `src/<module>.rs` default.
@@ -230,7 +230,7 @@ pub fn build(path: impl AsRef<Path>) -> Result<(), Error> {
     if hash != existing_hash || !ttf_target.exists() {
         // Build a subset TTF with only the requested glyphs
         let codepoints: Vec<u32> = icons.values().copied().collect();
-        let font_data = subset_font(&codepoints);
+        let font_data = subset_font(&codepoints, definition.family.as_deref());
 
         if let Some(dir) = ttf_target.parent().filter(|p| !p.as_os_str().is_empty()) {
             fs::create_dir_all(dir)
@@ -239,7 +239,12 @@ pub fn build(path: impl AsRef<Path>) -> Result<(), Error> {
         fs::write(&ttf_target, &font_data)
             .unwrap_or_else(|e| panic!("Write lucide.ttf to {}: {e}", ttf_target.display()));
 
-        let module = generate_module(&icons, &hash, ttf_rel.to_string_lossy().replace('\\', "/"));
+        let module = generate_module(
+            &icons,
+            &hash,
+            ttf_rel.to_string_lossy().replace('\\', "/"),
+            definition.family.as_deref(),
+        );
 
         if let Some(dir) = module_target.parent().filter(|p| !p.as_os_str().is_empty()) {
             fs::create_dir_all(dir)
@@ -336,7 +341,7 @@ pub fn build_all(module_name: &str) -> Result<(), Error> {
         .map(|(name, code)| (sanitize_fn_name(&name), code))
         .collect();
 
-    let hash = compute_hash(&all_icons);
+    let hash = compute_hash(&all_icons, None);
 
     let module_depth = module_name.split("::").count();
     let module_target = PathBuf::from("src")
@@ -346,7 +351,10 @@ pub fn build_all(module_name: &str) -> Result<(), Error> {
     // Tell Cargo to re-run if the generated file is missing or modified.
     println!("cargo::rerun-if-changed={}", module_target.display());
 
-    let rel_root: PathBuf = std::iter::repeat("../").take(module_depth).collect::<String>().into();
+    let rel_root: PathBuf = std::iter::repeat("../")
+        .take(module_depth)
+        .collect::<String>()
+        .into();
 
     // TTF written to fonts/lucide.ttf
     let ttf_dir = PathBuf::from("fonts");
@@ -362,13 +370,13 @@ pub fn build_all(module_name: &str) -> Result<(), Error> {
         .trim_start_matches("// ");
 
     if hash != existing_hash || !ttf_target.exists() {
-        fs::write(&ttf_target, FONT_BYTES)
-            .unwrap_or_else(|e| panic!("Write lucide.ttf: {e}"));
+        fs::write(&ttf_target, FONT_BYTES).unwrap_or_else(|e| panic!("Write lucide.ttf: {e}"));
 
         let module = generate_module(
             &all_icons,
             &hash,
             ttf_rel.to_string_lossy().replace('\\', "/"),
+            None,
         );
 
         if let Some(dir) = module_target.parent() {
@@ -437,6 +445,19 @@ struct Definition {
     /// behavior.
     #[serde(default)]
     ttf_target: Option<PathBuf>,
+    /// Custom family name to embed in the generated TTF's `name` table AND
+    /// in the generated module's `render(...)` helper. When `None`, the
+    /// upstream Lucide font's `name` table is preserved verbatim (matching
+    /// historic behavior) and the render helper emits `.font("lucide")`.
+    ///
+    /// Set this to a unique-per-crate string when more than one crate in
+    /// your workspace uses `iced_lucide` simultaneously. cosmic-text /
+    /// fontdb resolve `iced::Font::with_name(...)` lookups via a single
+    /// match per family name; two distinct subsets registered under the
+    /// same `"lucide"` family collide and one shadows the other (the
+    /// shadowed one renders as tofu).
+    #[serde(default)]
+    family: Option<String>,
     icons: BTreeMap<String, String>,
 }
 
@@ -482,9 +503,14 @@ fn parse_icons() -> HashMap<String, u32> {
 /// Uses `subsetter` to strip unused glyph outlines, then injects a cmap table
 /// so the result works as a standalone screen font (subsetter removes cmap because
 /// it targets PDF embedding, which provides its own cmap).
-fn subset_font(codepoints: &[u32]) -> Vec<u8> {
-    let face = ttf_parser::Face::parse(FONT_BYTES, 0)
-        .expect("Parse bundled lucide.ttf");
+///
+/// When `family = Some(name)`, replaces the original `name` table with a
+/// minimal one announcing the custom family — see [`build_name_table`] for
+/// the byte layout. When `family = None`, the upstream Lucide font's name
+/// table is preserved verbatim so the Lucide license metadata is carried
+/// over into the subset.
+fn subset_font(codepoints: &[u32], family: Option<&str>) -> Vec<u8> {
+    let face = ttf_parser::Face::parse(FONT_BYTES, 0).expect("Parse bundled lucide.ttf");
 
     // GlyphRemapper::new() already includes .notdef (glyph 0).
     let mut remapper = subsetter::GlyphRemapper::new();
@@ -515,12 +541,122 @@ fn subset_font(codepoints: &[u32]) -> Vec<u8> {
     let cmap = build_cmap(&mut cp_to_new_gid);
     let with_cmap = inject_table(&subset_data, b"cmap", &cmap);
 
-    // Preserve the name table from the original font so Lucide's license
-    // metadata is carried over into the subset (subsetter removes it).
-    match extract_table(FONT_BYTES, b"name") {
-        Some(name_data) => inject_table(&with_cmap, b"name", &name_data),
-        None => with_cmap,
+    let name_data = match family {
+        // Custom family: emit a minimal `name` table announcing the new
+        // identity. The upstream Lucide license records are dropped — the
+        // caller is opting in to a custom family and is responsible for
+        // attribution in their own metadata.
+        Some(family) => build_name_table(family),
+        // No custom family: preserve the original name table so Lucide's
+        // license metadata is carried over (subsetter removes it).
+        None => match extract_table(FONT_BYTES, b"name") {
+            Some(data) => data,
+            None => return with_cmap,
+        },
+    };
+
+    inject_table(&with_cmap, b"name", &name_data)
+}
+
+/// Build a minimal OpenType `name` table (format 0) with four records:
+///
+/// - `name_id = 1` (Family)         = `family`
+/// - `name_id = 2` (Subfamily)      = `"Regular"`
+/// - `name_id = 4` (Full Name)      = `family`
+/// - `name_id = 6` (PostScript)     = `family` with spaces and hyphens
+///   replaced by `_` (PostScript names disallow both)
+///
+/// All four records are encoded for platform 3 (Windows) / encoding 1
+/// (Unicode BMP) / language 0x0409 (en-US), with strings stored as
+/// UTF-16 BE. cosmic-text / fontdb match by `name_id = 1` for the
+/// `Family::Name(...)` lookup that `iced::Font::with_name` produces.
+///
+/// Byte layout (per the OpenType spec, "name — Naming Table", format 0):
+///
+/// ```text
+/// name table header (6 bytes):
+///   uint16  format        = 0
+///   uint16  count         = number of name records
+///   Offset16 stringOffset = byte offset from start of table to the
+///                           string heap (header + count * 12)
+///
+/// name records (count * 12 bytes), sorted by
+/// (platformID, encodingID, languageID, nameID):
+///   uint16  platformID
+///   uint16  encodingID
+///   uint16  languageID
+///   uint16  nameID
+///   uint16  length         (in bytes)
+///   Offset16 offset        (from start of string heap)
+///
+/// string heap: concatenated UTF-16 BE bodies referenced by the records.
+/// ```
+fn build_name_table(family: &str) -> Vec<u8> {
+    // PostScript names: no spaces, no hyphens, no parens — replace with _.
+    let postscript: String = family
+        .chars()
+        .map(|c| match c {
+            ' ' | '-' | '(' | ')' | '[' | ']' | '{' | '}' | '<' | '>' | '/' | '%' => '_',
+            other => other,
+        })
+        .collect();
+
+    // (name_id, value) tuples, in (platformID, encodingID, languageID,
+    // nameID) sort order — for our single platform/encoding/language tuple
+    // that reduces to ascending name_id order.
+    let records: [(u16, &str); 4] = [
+        (1, family),
+        (2, "Regular"),
+        (4, family),
+        (6, postscript.as_str()),
+    ];
+
+    // Encode each string as UTF-16 BE and gather (length, offset) pairs.
+    let mut heap: Vec<u8> = Vec::new();
+    let mut entries: Vec<(u16, u16, u16)> = Vec::with_capacity(records.len()); // (name_id, length, offset)
+    for (name_id, value) in records.iter() {
+        let offset: u16 = heap
+            .len()
+            .try_into()
+            .expect("name table string heap fits in u16");
+        for unit in value.encode_utf16() {
+            heap.extend_from_slice(&unit.to_be_bytes());
+        }
+        let length: u16 = (heap.len() - offset as usize)
+            .try_into()
+            .expect("individual name record body fits in u16");
+        entries.push((*name_id, length, offset));
     }
+
+    let count: u16 = entries
+        .len()
+        .try_into()
+        .expect("name record count fits in u16");
+    let header_len: u16 = 6;
+    let records_len: u16 = count * 12;
+    let string_offset: u16 = header_len + records_len;
+
+    let mut out = Vec::with_capacity(string_offset as usize + heap.len());
+
+    // Header.
+    out.extend_from_slice(&0u16.to_be_bytes()); // format
+    out.extend_from_slice(&count.to_be_bytes()); // count
+    out.extend_from_slice(&string_offset.to_be_bytes()); // stringOffset
+
+    // Records — platform 3 / encoding 1 / language 0x0409 for all four.
+    for (name_id, length, offset) in entries.iter() {
+        out.extend_from_slice(&3u16.to_be_bytes()); // platformID = Windows
+        out.extend_from_slice(&1u16.to_be_bytes()); // encodingID = Unicode BMP
+        out.extend_from_slice(&0x0409u16.to_be_bytes()); // languageID = en-US
+        out.extend_from_slice(&name_id.to_be_bytes());
+        out.extend_from_slice(&length.to_be_bytes());
+        out.extend_from_slice(&offset.to_be_bytes());
+    }
+
+    // String heap.
+    out.extend_from_slice(&heap);
+
+    out
 }
 
 /// Build a cmap table (format 12) mapping codepoints → new glyph IDs.
@@ -539,17 +675,17 @@ fn build_cmap(entries: &mut Vec<(u32, u16)>) -> Vec<u8> {
     cmap.extend_from_slice(&1u16.to_be_bytes()); // numTables
 
     // Encoding record: Windows / Unicode full repertoire (platformID=3, encodingID=10)
-    cmap.extend_from_slice(&3u16.to_be_bytes());  // platformID
+    cmap.extend_from_slice(&3u16.to_be_bytes()); // platformID
     cmap.extend_from_slice(&10u16.to_be_bytes()); // encodingID
     // Offset from start of cmap table to subtable: header(4) + record(8) = 12
     cmap.extend_from_slice(&12u32.to_be_bytes());
 
     // Subtable (format 12)
-    cmap.extend_from_slice(&12u16.to_be_bytes());        // format
-    cmap.extend_from_slice(&0u16.to_be_bytes());         // reserved
+    cmap.extend_from_slice(&12u16.to_be_bytes()); // format
+    cmap.extend_from_slice(&0u16.to_be_bytes()); // reserved
     cmap.extend_from_slice(&subtable_len.to_be_bytes()); // length
-    cmap.extend_from_slice(&0u32.to_be_bytes());         // language
-    cmap.extend_from_slice(&n.to_be_bytes());            // numGroups
+    cmap.extend_from_slice(&0u32.to_be_bytes()); // language
+    cmap.extend_from_slice(&n.to_be_bytes()); // numGroups
 
     // One SequentialMapGroup per codepoint (startCharCode = endCharCode = cp)
     for &(cp, gid) in entries.iter() {
@@ -574,10 +710,8 @@ fn extract_table(font: &[u8], tag: &[u8; 4]) -> Option<Vec<u8>> {
         }
         let t: [u8; 4] = font[base..base + 4].try_into().ok()?;
         if &t == tag {
-            let offset =
-                u32::from_be_bytes(font[base + 8..base + 12].try_into().ok()?) as usize;
-            let length =
-                u32::from_be_bytes(font[base + 12..base + 16].try_into().ok()?) as usize;
+            let offset = u32::from_be_bytes(font[base + 8..base + 12].try_into().ok()?) as usize;
+            let length = u32::from_be_bytes(font[base + 12..base + 16].try_into().ok()?) as usize;
             return font.get(offset..offset + length).map(|d| d.to_vec());
         }
     }
@@ -621,7 +755,11 @@ fn inject_table(font: &[u8], tag: &[u8; 4], table_data: &[u8]) -> Vec<u8> {
 /// Rebuild a complete OpenType font binary from a sorted table list.
 fn reconstruct_otf(flavor: u32, tables: &[([u8; 4], Vec<u8>)]) -> Vec<u8> {
     let n = tables.len() as u16;
-    let entry_selector = if n > 0 { (n as f64).log2().floor() as u16 } else { 0 };
+    let entry_selector = if n > 0 {
+        (n as f64).log2().floor() as u16
+    } else {
+        0
+    };
     let search_range = 2u16.pow(u32::from(entry_selector)) * 16;
     let range_shift = n * 16 - search_range;
 
@@ -712,12 +850,11 @@ fn otf_checksum(data: &[u8]) -> u32 {
 fn sanitize_fn_name(name: &str) -> String {
     // Strict and reserved keywords in all Rust editions.
     const KEYWORDS: &[&str] = &[
-        "abstract", "as", "async", "await", "become", "box", "break", "const",
-        "continue", "crate", "do", "dyn", "else", "enum", "extern", "false", "final",
-        "fn", "for", "if", "impl", "in", "let", "loop", "macro", "match", "mod",
-        "move", "mut", "override", "priv", "pub", "ref", "return", "self", "static",
-        "struct", "super", "trait", "true", "try", "type", "typeof", "unsafe",
-        "unsized", "use", "virtual", "where", "while", "yield",
+        "abstract", "as", "async", "await", "become", "box", "break", "const", "continue", "crate",
+        "do", "dyn", "else", "enum", "extern", "false", "final", "fn", "for", "if", "impl", "in",
+        "let", "loop", "macro", "match", "mod", "move", "mut", "override", "priv", "pub", "ref",
+        "return", "self", "static", "struct", "super", "trait", "true", "try", "type", "typeof",
+        "unsafe", "unsized", "use", "virtual", "where", "while", "yield",
     ];
 
     let mut s = name.replace('-', "_");
@@ -730,8 +867,14 @@ fn sanitize_fn_name(name: &str) -> String {
     s
 }
 
-/// SHA-256 hash of the sorted icon list, returned as a hex string.
-fn compute_hash(icons: &BTreeMap<String, u32>) -> String {
+/// SHA-256 hash of the sorted icon list and family name, returned as
+/// a hex string.
+///
+/// `family` participates in the hash so that flipping or renaming the
+/// custom family in the TOML invalidates the cached generated module
+/// and TTF. Without it, a build that only changes `family` would skip
+/// regeneration and ship a TTF with the old `name` table.
+fn compute_hash(icons: &BTreeMap<String, u32>, family: Option<&str>) -> String {
     use sha2::Digest as _;
     let mut hasher = sha2::Sha256::new();
     for (name, code) in icons {
@@ -740,11 +883,25 @@ fn compute_hash(icons: &BTreeMap<String, u32>) -> String {
         hasher.update(code.to_le_bytes());
         hasher.update(b"|");
     }
+    if let Some(family) = family {
+        hasher.update(b"family=");
+        hasher.update(family.as_bytes());
+    }
     format!("{:x}", hasher.finalize())
 }
 
 /// Render the Rust module source.
-fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) -> String {
+///
+/// `family` selects the family-name string baked into the generated
+/// `render(...)` helper: `Some(name)` produces `Text::new(cp).font(name)`,
+/// `None` falls back to the historic `Text::new(cp).font("lucide")`.
+fn generate_module(
+    icons: &BTreeMap<String, u32>,
+    hash: &str,
+    ttf_path: String,
+    family: Option<&str>,
+) -> String {
+    let family_literal = family.unwrap_or("lucide");
     let mut out = String::new();
 
     out.push_str(&format!(
@@ -777,18 +934,18 @@ fn generate_module(icons: &BTreeMap<String, u32>, hash: &str, ttf_path: String) 
     }
 
     // Public render helper — for use with ALL_ICONS in picker widgets
-    out.push_str(
+    out.push_str(&format!(
         "/// Render any Lucide icon by its codepoint string.\n\
          /// Use this together with [`ALL_ICONS`] to display icons dynamically:\n\
          /// ```ignore\n\
-         /// for (name, cp) in ALL_ICONS {\n\
+         /// for (name, cp) in ALL_ICONS {{\n\
          ///     button(render(cp)).on_press(Msg::Pick(name.to_string()))\n\
-         /// }\n\
+         /// }}\n\
          /// ```\n\
          pub fn render<'a, Theme>(codepoint: &'a str) -> Text<'a, Theme>\n\
          where\n    Theme: text::Catalog + 'a,\n\
-         {\n    Text::new(codepoint).font(\"lucide\")\n}\n\n",
-    );
+         {{\n    Text::new(codepoint).font(\"{family_literal}\")\n}}\n\n"
+    ));
 
     // Private helper used by typed icon functions
     out.push_str(
@@ -842,9 +999,18 @@ mod tests {
         let mut icons = BTreeMap::new();
         icons.insert("edit".to_string(), 0xE001u32);
         icons.insert("save".to_string(), 0xE002u32);
-        let h1 = compute_hash(&icons);
-        let h2 = compute_hash(&icons);
+        let h1 = compute_hash(&icons, None);
+        let h2 = compute_hash(&icons, None);
         assert_eq!(h1, h2);
+
+        // Family participates: distinct family → distinct hash.
+        let h_default = compute_hash(&icons, None);
+        let h_custom = compute_hash(&icons, Some("granita-lucide"));
+        assert_ne!(h_default, h_custom);
+
+        // Same family → stable hash.
+        let h_custom2 = compute_hash(&icons, Some("granita-lucide"));
+        assert_eq!(h_custom, h_custom2);
     }
 
     #[test]
@@ -974,7 +1140,7 @@ mod tests {
     fn subset_is_smaller_and_valid() {
         // A handful of icons — far fewer than the full 1685.
         let codepoints = [0xE001, 0xE002, 0xE003, 0xE004, 0xE005];
-        let subsetted = subset_font(&codepoints);
+        let subsetted = subset_font(&codepoints, None);
 
         // Must be smaller than the full font.
         assert!(
@@ -1002,5 +1168,90 @@ mod tests {
         // ttf-parser should be able to parse it.
         let face = ttf_parser::Face::parse(&subsetted, 0);
         assert!(face.is_ok(), "ttf-parser must accept the subsetted font");
+    }
+
+    #[test]
+    fn subset_with_custom_family_writes_name_table() {
+        let codepoints = [0xE001, 0xE002, 0xE003];
+        let subsetted = subset_font(&codepoints, Some("test-fam"));
+
+        let face = ttf_parser::Face::parse(&subsetted, 0)
+            .expect("ttf-parser parses subset with custom family");
+
+        let names = face.names();
+        let mut found_family = false;
+        let mut found_postscript = false;
+        for record in names {
+            // ttf-parser only exposes Unicode-decodable records via `to_string()`.
+            // Our writer emits Windows / Unicode BMP / en-US records, which it
+            // decodes from UTF-16 BE.
+            let Some(value) = record.to_string() else {
+                continue;
+            };
+            match record.name_id {
+                1 => {
+                    assert_eq!(
+                        value, "test-fam",
+                        "name_id=1 (Family) must be the custom family"
+                    );
+                    found_family = true;
+                }
+                6 => {
+                    assert_eq!(
+                        value, "test_fam",
+                        "name_id=6 (PostScript) must replace hyphens with underscores"
+                    );
+                    found_postscript = true;
+                }
+                _ => {}
+            }
+        }
+        assert!(found_family, "subset must contain a Family name record");
+        assert!(
+            found_postscript,
+            "subset must contain a PostScript name record"
+        );
+    }
+
+    #[test]
+    fn build_name_table_layout_matches_spec() {
+        // Sanity-check the on-disk layout: header (6 bytes) + 4 records *
+        // 12 bytes + UTF-16 BE string heap.
+        let table = build_name_table("foo");
+
+        let format = u16::from_be_bytes([table[0], table[1]]);
+        let count = u16::from_be_bytes([table[2], table[3]]);
+        let string_offset = u16::from_be_bytes([table[4], table[5]]);
+
+        assert_eq!(format, 0, "format 0 selected");
+        assert_eq!(count, 4, "Family / Subfamily / Full / PostScript");
+        assert_eq!(
+            string_offset as usize,
+            6 + 4 * 12,
+            "string heap follows header + records"
+        );
+
+        // First record: Family ("foo") — 6 bytes UTF-16 BE.
+        let rec0 = 6;
+        let plat = u16::from_be_bytes([table[rec0], table[rec0 + 1]]);
+        let enc = u16::from_be_bytes([table[rec0 + 2], table[rec0 + 3]]);
+        let lang = u16::from_be_bytes([table[rec0 + 4], table[rec0 + 5]]);
+        let nid = u16::from_be_bytes([table[rec0 + 6], table[rec0 + 7]]);
+        let len = u16::from_be_bytes([table[rec0 + 8], table[rec0 + 9]]);
+        let off = u16::from_be_bytes([table[rec0 + 10], table[rec0 + 11]]);
+        assert_eq!(plat, 3, "Windows platform");
+        assert_eq!(enc, 1, "Unicode BMP");
+        assert_eq!(lang, 0x0409, "en-US");
+        assert_eq!(nid, 1, "first record is Family");
+        assert_eq!(len, 6, "'foo' is 3 chars * 2 bytes UTF-16 BE");
+        assert_eq!(off, 0, "first record's string starts at heap offset 0");
+
+        // String heap starts at `string_offset` and the first 6 bytes
+        // should be UTF-16 BE for "foo".
+        let heap_start = string_offset as usize;
+        assert_eq!(
+            &table[heap_start..heap_start + 6],
+            &[0x00, b'f', 0x00, b'o', 0x00, b'o'],
+        );
     }
 }
