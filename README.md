@@ -10,7 +10,7 @@ thousand its upstream publishes.
 No network calls. Every font and its icon index are vendored into the crate.
 
 > **On the name:** this started as a Lucide-only crate and kept its name through
-> the move to seventeen icon sets, so existing users are not stranded. Lucide is still
+> the move to twenty-six icon sets, so existing users are not stranded. Lucide is still
 > the default family.
 
 ## Icon sets
@@ -36,7 +36,31 @@ it asks for.
 | `simple_icons` | [Simple Icons](https://simpleicons.org) | `simple-icons` | 3457 | CC0-1.0 |
 | `boxicons` | [Boxicons](https://boxicons.com) | `boxicons` | 1634 | MIT |
 
-That is **52,977 icons** across 17 families. Nothing is enabled but Lucide
+### Extra weights and styles
+
+Several sets publish more than one face. Each is a separate font, so each is a
+separate family behind its own feature — the base feature above stays a single
+face, and you download only the weights you actually use.
+
+| Feature | Adds | Icons |
+|---|---|---:|
+| `material_symbols_styles` | `material-symbols-rounded`, `material-symbols-sharp` | 8550 |
+| `phosphor_weights` | `phosphor-thin`, `-light`, `-bold`, `-fill`, `-duotone` | 7632 |
+| `tabler_filled` | `tabler-filled` | 1057 |
+| `fluent_filled` | `fluent-filled` | 9833 |
+
+These are separate *families*, not weights on an existing one:
+
+```toml
+[icons.phosphor-bold]
+save = "floppy-disk"
+```
+
+That is deliberate. Naming the face means asking for one that is not enabled is
+a build error, where `Font::new("phosphor").weight(Bold)` against a family that
+only has Regular loaded would quietly render Regular instead.
+
+That is **80,049 icons** across 26 families. Nothing is enabled but Lucide
 unless you ask for it.
 
 Enable what you need:
@@ -71,7 +95,9 @@ iced_lucide = { version = "0.2", features = ["bootstrap", "fontawesome"] }
   of their owners and the license grants no right to use them.
 - **Boxicons** — regular, solid, and logo styles share one font, so solid and
   logo names are prefixed: `alarm`, `solid-alarm`, `logo-github`.
-- **Phosphor** — the Regular weight. The other five are separate upstream fonts.
+- **Phosphor** — the base feature is the Regular weight; `phosphor_weights` adds
+  the other five. Duotone draws two tones from one glyph, so it renders as a
+  single flat colour here rather than the layered look the web font achieves.
 - **Iconoir is not supported.** It has no icon font — its stylesheet draws every
   icon from an inline SVG data URI, so there is nothing to subset.
 
@@ -266,16 +292,23 @@ what is already there. Adding a new icon set means appending an entry to
 ```bash
 cargo run -p subset_example        # several families in one module
 cargo run -p all_icons_example     # a grid of every Lucide icon
-cargo run -p icon_picker_example   # browse all 17 families
+cargo run -p icon_picker_example   # browse all 26 families
 ```
 
 `icon_picker_example` is the one to reach for when deciding what to use: search
-across all 52,977 icons, filter by family, click to collect them in a side
-panel, and recolour the lot. Custom colours come from the
-[`color_picker_two`](https://github.com/A-Disruption/widgets) widget.
+across all 80,049 icons, filter by family, click to collect them in a side
+panel, and recolour the lot. The family and colour dropdowns are built on the
+[`popover`](https://github.com/A-Disruption/widgets) widget.
+
+The toolbar carries a search box, a **family filter** that narrows a
+multi-select list as you type, a **size dropdown** from 12 to 64 px so you can
+see how an icon reads at the size you will actually use it, and a **colour
+chip** offering the theme's own colour or a handful of overrides.
 
 It will also write your selection out for you. The export panel offers three
-snippets, each copyable to the clipboard:
+snippets. Each is shown in a read-only editor you can select and copy a line at
+a time — useful when the target file already has entries — or take whole with
+**Copy all**:
 
 | Snippet | What you get |
 |---|---|

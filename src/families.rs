@@ -286,6 +286,140 @@ pub(crate) const BOXICONS: Family = Family {
     index: include_str!("../assets/boxicons/icons.idx"),
 };
 
+/// [Material Symbols (Rounded)](https://fonts.google.com/icons) — Apache-2.0.
+#[cfg(feature = "material_symbols_styles")]
+pub(crate) const MATERIAL_SYMBOLS_ROUNDED: Family = Family {
+    id: "material-symbols-rounded",
+    label: "Material Symbols (Rounded)",
+    feature: "material_symbols_styles",
+    font_family: "material-symbols-rounded",
+    file_stem: "material-symbols-rounded",
+    browse_url: "https://fonts.google.com/icons",
+    license: "Apache-2.0",
+    font: include_bytes!("../assets/material-symbols-rounded/material-symbols-rounded.ttf"),
+    index: include_str!("../assets/material-symbols-rounded/icons.idx"),
+};
+
+/// [Material Symbols (Sharp)](https://fonts.google.com/icons) — Apache-2.0.
+#[cfg(feature = "material_symbols_styles")]
+pub(crate) const MATERIAL_SYMBOLS_SHARP: Family = Family {
+    id: "material-symbols-sharp",
+    label: "Material Symbols (Sharp)",
+    feature: "material_symbols_styles",
+    font_family: "material-symbols-sharp",
+    file_stem: "material-symbols-sharp",
+    browse_url: "https://fonts.google.com/icons",
+    license: "Apache-2.0",
+    font: include_bytes!("../assets/material-symbols-sharp/material-symbols-sharp.ttf"),
+    index: include_str!("../assets/material-symbols-sharp/icons.idx"),
+};
+
+/// [Phosphor (Thin)](https://phosphoricons.com) — MIT.
+#[cfg(feature = "phosphor_weights")]
+pub(crate) const PHOSPHOR_THIN: Family = Family {
+    id: "phosphor-thin",
+    label: "Phosphor (Thin)",
+    feature: "phosphor_weights",
+    font_family: "phosphor-thin",
+    file_stem: "phosphor-thin",
+    browse_url: "https://phosphoricons.com",
+    license: "MIT",
+    font: include_bytes!("../assets/phosphor-thin/phosphor-thin.ttf"),
+    index: include_str!("../assets/phosphor-thin/icons.idx"),
+};
+
+/// [Phosphor (Light)](https://phosphoricons.com) — MIT.
+#[cfg(feature = "phosphor_weights")]
+pub(crate) const PHOSPHOR_LIGHT: Family = Family {
+    id: "phosphor-light",
+    label: "Phosphor (Light)",
+    feature: "phosphor_weights",
+    font_family: "phosphor-light",
+    file_stem: "phosphor-light",
+    browse_url: "https://phosphoricons.com",
+    license: "MIT",
+    font: include_bytes!("../assets/phosphor-light/phosphor-light.ttf"),
+    index: include_str!("../assets/phosphor-light/icons.idx"),
+};
+
+/// [Phosphor (Bold)](https://phosphoricons.com) — MIT.
+#[cfg(feature = "phosphor_weights")]
+pub(crate) const PHOSPHOR_BOLD: Family = Family {
+    id: "phosphor-bold",
+    label: "Phosphor (Bold)",
+    feature: "phosphor_weights",
+    font_family: "phosphor-bold",
+    file_stem: "phosphor-bold",
+    browse_url: "https://phosphoricons.com",
+    license: "MIT",
+    font: include_bytes!("../assets/phosphor-bold/phosphor-bold.ttf"),
+    index: include_str!("../assets/phosphor-bold/icons.idx"),
+};
+
+/// [Phosphor (Fill)](https://phosphoricons.com) — MIT.
+#[cfg(feature = "phosphor_weights")]
+pub(crate) const PHOSPHOR_FILL: Family = Family {
+    id: "phosphor-fill",
+    label: "Phosphor (Fill)",
+    feature: "phosphor_weights",
+    font_family: "phosphor-fill",
+    file_stem: "phosphor-fill",
+    browse_url: "https://phosphoricons.com",
+    license: "MIT",
+    font: include_bytes!("../assets/phosphor-fill/phosphor-fill.ttf"),
+    index: include_str!("../assets/phosphor-fill/icons.idx"),
+};
+
+/// [Phosphor (Duotone)](https://phosphoricons.com) — MIT.
+///
+/// Duotone draws two tones from one glyph, so it renders as a single flat
+/// colour here rather than the two-tone look the web font achieves with
+/// layers.
+#[cfg(feature = "phosphor_weights")]
+pub(crate) const PHOSPHOR_DUOTONE: Family = Family {
+    id: "phosphor-duotone",
+    label: "Phosphor (Duotone)",
+    feature: "phosphor_weights",
+    font_family: "phosphor-duotone",
+    file_stem: "phosphor-duotone",
+    browse_url: "https://phosphoricons.com",
+    license: "MIT",
+    font: include_bytes!("../assets/phosphor-duotone/phosphor-duotone.ttf"),
+    index: include_str!("../assets/phosphor-duotone/icons.idx"),
+};
+
+/// [Tabler Icons (Filled)](https://tabler.io/icons) — MIT.
+///
+/// Only the subset of Tabler icons that has a filled drawing.
+#[cfg(feature = "tabler_filled")]
+pub(crate) const TABLER_FILLED: Family = Family {
+    id: "tabler-filled",
+    label: "Tabler Icons (Filled)",
+    feature: "tabler_filled",
+    font_family: "tabler-icons-filled",
+    file_stem: "tabler-icons-filled",
+    browse_url: "https://tabler.io/icons",
+    license: "MIT",
+    font: include_bytes!("../assets/tabler-filled/tabler-icons-filled.ttf"),
+    index: include_str!("../assets/tabler-filled/icons.idx"),
+};
+
+/// [Fluent System Icons (Filled)](https://github.com/microsoft/fluentui-system-icons) — MIT.
+///
+/// Names keep their pixel size, as the Regular style does.
+#[cfg(feature = "fluent_filled")]
+pub(crate) const FLUENT_FILLED: Family = Family {
+    id: "fluent-filled",
+    label: "Fluent System Icons (Filled)",
+    feature: "fluent_filled",
+    font_family: "fluent-system-icons-filled",
+    file_stem: "fluent-system-icons-filled",
+    browse_url: "https://github.com/microsoft/fluentui-system-icons",
+    license: "MIT",
+    font: include_bytes!("../assets/fluent-filled/fluent-system-icons-filled.ttf"),
+    index: include_str!("../assets/fluent-filled/icons.idx"),
+};
+
 /// Every family enabled by the current feature set, in declaration order.
 // Each push is behind its own `cfg`, so they cannot be collapsed into the
 // initialiser the way the lint suggests.
@@ -328,6 +462,24 @@ pub(crate) fn enabled() -> Vec<&'static Family> {
     families.push(&SIMPLE_ICONS);
     #[cfg(feature = "boxicons")]
     families.push(&BOXICONS);
+    #[cfg(feature = "material_symbols_styles")]
+    families.push(&MATERIAL_SYMBOLS_ROUNDED);
+    #[cfg(feature = "material_symbols_styles")]
+    families.push(&MATERIAL_SYMBOLS_SHARP);
+    #[cfg(feature = "phosphor_weights")]
+    families.push(&PHOSPHOR_THIN);
+    #[cfg(feature = "phosphor_weights")]
+    families.push(&PHOSPHOR_LIGHT);
+    #[cfg(feature = "phosphor_weights")]
+    families.push(&PHOSPHOR_BOLD);
+    #[cfg(feature = "phosphor_weights")]
+    families.push(&PHOSPHOR_FILL);
+    #[cfg(feature = "phosphor_weights")]
+    families.push(&PHOSPHOR_DUOTONE);
+    #[cfg(feature = "tabler_filled")]
+    families.push(&TABLER_FILLED);
+    #[cfg(feature = "fluent_filled")]
+    families.push(&FLUENT_FILLED);
 
     families
 }

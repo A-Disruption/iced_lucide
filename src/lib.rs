@@ -34,7 +34,21 @@
 //! | `simple_icons` | [Simple Icons](https://simpleicons.org) | `simple-icons` | CC0-1.0 |
 //! | `boxicons` | [Boxicons](https://boxicons.com) | `boxicons` | MIT |
 //!
-//! Seventeen families, 52,977 icons. Several carry caveats — Material Symbols
+//! Sets that publish more than one face have the extras behind their own
+//! feature, so the base feature stays a single font:
+//!
+//! | Feature | Adds |
+//! |---|---|
+//! | `material_symbols_styles` | `material-symbols-rounded`, `material-symbols-sharp` |
+//! | `phosphor_weights` | `phosphor-thin`, `-light`, `-bold`, `-fill`, `-duotone` |
+//! | `tabler_filled` | `tabler-filled` |
+//! | `fluent_filled` | `fluent-filled` |
+//!
+//! Each face is its own family rather than a weight on an existing one, so
+//! asking for one that is not enabled fails the build instead of quietly
+//! falling back to the regular weight.
+//!
+//! Twenty-six families, 80,049 icons. Several carry caveats — Material Symbols
 //! is vendored from its variable font's default instance, Fluent names keep
 //! their pixel size, Boxicons prefixes its solid and logo styles — which the
 //! README sets out in full.

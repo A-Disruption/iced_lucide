@@ -31,6 +31,13 @@ fluent = []
 simple_icons = []
 boxicons = []
 
+# Extra weights and styles. Each is a separate font, so each is its own family
+# and its own download — the base feature above stays a single face.
+material_symbols_styles = []
+phosphor_weights = []
+tabler_filled = []
+fluent_filled = []
+
 # Everything at once. Convenient for icon browsers; heavy for anything else.
 all = [
   "lucide",
@@ -48,6 +55,10 @@ all = [
   "fluent",
   "simple_icons",
   "boxicons",
+  "material_symbols_styles",
+  "phosphor_weights",
+  "tabler_filled",
+  "fluent_filled",
 ]
 
 [dependencies]
@@ -78,9 +89,9 @@ iced = { git = "https://github.com/iced-rs/iced", rev = "4cad51ba61e3d76a7e696ad
   "advanced",
 ] }
 
-# The colour picker used by icon_picker_example.
+# The anchored popover used by icon_picker_example.
 widgets = { git = "https://github.com/A-Disruption/widgets", features = [
-  "color_picker_two",
+  "popover",
 ] }
 
 [dev-dependencies]
