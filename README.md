@@ -1,12 +1,61 @@
 # iced_lucide
 
-A compile-time, type-safe [Lucide](https://lucide.dev) icon font library for [`iced`](https://github.com/iced-rs/iced).
+Compile-time, type-safe icon fonts for [`iced`](https://github.com/iced-rs/iced).
 
-No network calls. The Lucide TTF and icon map are bundled directly into the library.
+Pick the icons you want in a TOML file. This crate cuts a font containing
+exactly those glyphs and generates a typed function for each one. A project
+using a dozen icons ships a font holding a dozen glyphs — not the several
+thousand its upstream publishes.
+
+No network calls. Every font and its icon index are vendored into the crate.
+
+> **On the name:** this started as a Lucide-only crate and kept its name through
+> the move to ten icon sets, so existing users are not stranded. Lucide is still
+> the default family.
+
+## Icon sets
+
+Each family sits behind its own Cargo feature, so a build embeds only the fonts
+it asks for.
+
+| Feature | Set | Identifier(s) | Icons | License |
+|---|---|---|---:|---|
+| `lucide` *(default)* | [Lucide](https://lucide.dev/icons) | `lucide` | 2048 | ISC |
+| `bootstrap` | [Bootstrap Icons](https://icons.getbootstrap.com) | `bootstrap` | 2078 | MIT |
+| `codicon` | [VS Code Codicons](https://microsoft.github.io/vscode-codicons/dist/codicon.html) | `codicon` | 746 | CC-BY-4.0 |
+| `devicon` | [Devicon](https://devicon.dev) | `devicon` | 1491 | MIT |
+| `fontawesome` | [Font Awesome Free](https://fontawesome.com/icons/packs/classic) | `fa-solid`, `fa-regular`, `fa-brands` | 2054 | CC-BY-4.0 / OFL-1.1 |
+| `nerdfonts` | [Nerd Fonts](https://www.nerdfonts.com) | `nerdfonts` | 10995 | MIT |
+| `octicons` | [Octicons](https://primer.style/octicons) | `octicons` | 310 | MIT |
+| `pomicons` | [Pomicons](https://github.com/gabrielelana/pomicons) | `pomicons` | 11 | see vendored `LICENSE` |
+
+Enable what you need:
+
+```toml
+[build-dependencies]
+iced_lucide = { version = "0.2", features = ["bootstrap", "fontawesome"] }
+```
+
+`features = ["all"]` turns on everything.
+
+### Caveats worth knowing
+
+- **Octicons** — GitHub removed the icon font at Octicons v9, and
+  `primer.style/octicons` is SVG-only today. The glyphs are taken from the Nerd
+  Fonts `oct-` range instead, which tracks a far later version than the last
+  standalone font did (310 icons against 172), and cut back out into a font of
+  their own. Names use Primer's spelling — `arrow-down`, not the
+  `oct-arrow_down` Nerd Fonts writes.
+- **Font Awesome** — brand marks are trademarks of their owners; the license
+  does not grant any right to use them.
+- **Devicon** — the multi-colour `original` variants exist only as SVG. The font
+  carries the single-colour `plain` and `line` variants.
+- **Nerd Fonts** — aggregates glyphs from many upstream sets, each under its own
+  license. Names keep their upstream prefix (`cod-`, `dev-`, `fa-`, `oct-`, …).
 
 ## Usage
 
-Create a `.toml` file in your crate with the icons you need:
+Create a `.toml` file describing the icons you want:
 
 ```toml
 # fonts/my-icons.toml
@@ -16,16 +65,26 @@ module = "icon"
 edit   = "pencil"
 save   = "save"
 trash  = "trash-2"
-search = "search"
+
+# A "family:" prefix pulls one icon from another set.
+github = "fa-brands:github"
+
+# Or group several under one family.
+[icons.bootstrap]
+bluetooth = "bluetooth"
+wifi      = "wifi"
 ```
 
-Each key is the Rust function name; each value is the [Lucide icon name](https://lucide.dev/icons).
-
-Add `iced_lucide` to your `build-dependencies`:
+Each key is the Rust function name; each value is the upstream icon name.
+Unprefixed names come from the `family` key if you set one, and otherwise from
+Lucide:
 
 ```toml
-[build-dependencies]
-iced_lucide = { git = "https://github.com/A-Disruption/iced_lucide" }
+module = "icon"
+family = "bootstrap"   # now bare names mean Bootstrap Icons
+
+[icons]
+save = "floppy"
 ```
 
 Call `build` in your `build.rs`:
@@ -37,77 +96,192 @@ pub fn main() {
 }
 ```
 
-This generates `src/icon.rs` and copies `lucide.ttf` next to your TOML.
+This generates `src/icon.rs` and writes one subset `.ttf` per family used, next
+to the TOML.
 
-Register the font and use the generated functions:
+Register the fonts and use the generated functions:
 
 ```rust
 mod icon;
 
 fn main() -> iced::Result {
-    iced::application(App::default, App::update, App::view)
-        .font(icon::FONT)
-        .run()
+    let mut app = iced::application(App::default, App::update, App::view);
+
+    for font in icon::FONTS {
+        app = app.font(*font);
+    }
+
+    app.run()
 }
 
 fn view(&self) -> iced::Element<'_, ()> {
-    iced::widget::row![icon::edit(), icon::save(), icon::trash()]
+    iced::widget::row![icon::edit(), icon::save(), icon::github()]
         .spacing(10)
         .into()
 }
 ```
 
-## All Icons (icon picker)
+A misspelled icon fails the build with suggestions rather than rendering a blank
+box at runtime:
 
-To generate every Lucide icon at once — useful for picker widgets or UI builders:
+```
+Lucide has no icon "penci".
+Did you mean: pencil, pencil-off, pencil-line, pencil-ruler, pen?
+Browse all icons at https://lucide.dev/icons
+```
+
+## What the generated module exports
+
+| Item | Purpose |
+|---|---|
+| `FONTS: &[&[u8]]` | Every subset font, ready to register |
+| `FONT: &[u8]` | The single font, when only one family is used |
+| `Family` | `{ id, name, feature, license, url }` |
+| `FAMILIES: &[Family]` | The sets used — for a filter UI, or an about screen |
+| `Icon` | `{ name, codepoint, font, family }` |
+| `ALL_ICONS: &[Icon]` | Every icon in the module |
+| `render(icon: Icon) -> Text` | Draw any `Icon` |
+| `find(name: &str) -> Option<Icon>` | Look one up by upstream name |
+| one `fn` per icon | e.g. `icon::edit()` |
+
+## All icons (icon picker)
+
+To generate an entire family at once — useful for picker widgets and UI
+builders:
 
 ```rust
 pub fn main() {
-    iced_lucide::build_all("icon").expect("Build all icons");
+    iced_lucide::build_all("lucide", "icon").expect("Build all icons");
 }
 ```
-
-The generated module exports `ALL_ICONS: &[(&str, &str)]`, a static list of
-`(icon_name, codepoint_str)` pairs you can iterate at runtime:
 
 ```rust
 use crate::icon::ALL_ICONS;
 
-// in your view:
 let buttons: Vec<_> = ALL_ICONS
     .iter()
-    .map(|(name, cp)| button(text(*cp)).on_press(Msg::Pick(name.to_string())))
+    .map(|icon| button(icon::render(*icon)).on_press(Msg::Pick(icon.name)))
     .collect();
 ```
 
-## Runtime enumeration
+This emits one function per icon, so pointing it at a very large family produces
+a correspondingly large module — Nerd Fonts would generate almost eleven
+thousand of them.
 
-Add `iced_lucide` as a regular `[dependency]` (not just build) to call
-`iced_lucide::icons()` at runtime:
+## Browsing several families
+
+For a picker spanning more than one set, `build_index` generates the same
+module *without* the per-icon functions — naming twenty thousand icons in Rust
+helps nobody:
 
 ```rust
-for (name, codepoint) in iced_lucide::icons() {
+pub fn main() {
+    // An empty slice means every family the enabled features provide.
+    iced_lucide::build_index(&[], "icon").expect("Build icon index");
+}
+```
+
+Each `Icon` carries the `family` it came from, and `FAMILIES` lists them, so
+filtering is straightforward:
+
+```rust
+let shown = icon::ALL_ICONS
+    .iter()
+    .filter(|i| active.is_empty() || active.contains(i.family))
+    .filter(|i| i.name.contains(&search));
+```
+
+`Family` also carries the Cargo `feature` that provides it, which is what lets
+the picker below write out a manifest entry for whatever you selected.
+
+## Runtime enumeration
+
+Add `iced_lucide` as a regular `[dependency]` (not just a build one) to inspect
+what it carries:
+
+```rust
+for family in iced_lucide::families() {
+    println!("{} — {} icons", family.label(), family.icons().len());
+}
+
+let lucide = iced_lucide::family("lucide").unwrap();
+
+for (name, codepoint) in lucide.icons() {
     println!("{name}  U+{codepoint:04X}");
 }
 ```
 
-## Updating Lucide
+## Attribution
 
-Both the TTF and the icon map are bundled in `assets/`. To update to a newer
-Lucide release, replace both files together and rebuild:
+Subsetting rewrites a font's identity so it can be addressed by a name we
+choose, but it carries the upstream copyright, trademark, and license records
+through untouched. The full license text for every set is vendored in
+`assets/<family>/LICENSE`, and the generated module exposes `LICENSES` so an
+about screen can show it. **Shipping these fonts means shipping their licenses.**
+
+## Updating a family
+
+The vendoring tool fetches each upstream, normalises its metadata, and rewrites
+`assets/`:
 
 ```bash
-curl -L -o assets/lucide.ttf   https://cdn.jsdelivr.net/npm/lucide-static/font/lucide.ttf
-curl -L -o assets/unicode.html https://cdn.jsdelivr.net/npm/lucide-static/font/unicode.html
+cargo run -p vendor
 ```
 
-The hash-based cache in the build script detects the change and regenerates
-your icon module automatically.
+Pass a family to refresh just one:
 
-## Example
-
-See the [`example`](example) directory for a full working application.
-
+```bash
+cargo run -p vendor -- lucide
 ```
-cargo run --manifest-path example/Cargo.toml
+
+Downloads are cached in `tools/vendor/.cache/`, so `--offline` rebuilds from
+what is already there. Adding a new icon set means appending an entry to
+`tools/vendor/src/sources.rs` and re-running the tool — it regenerates
+`src/families.rs` as well as the assets.
+
+## Examples
+
+```bash
+cargo run -p subset_example        # several families in one module
+cargo run -p all_icons_example     # a grid of every Lucide icon
+cargo run -p icon_picker_example   # browse all ten families
 ```
+
+`icon_picker_example` is the one to reach for when deciding what to use: search
+across all 19,733 icons, filter by family, click to collect them in a side
+panel, and recolour the lot. Custom colours come from the
+[`color_picker_two`](https://github.com/A-Disruption/widgets) widget.
+
+It will also write your selection out for you. The export panel offers three
+snippets, each copyable to the clipboard:
+
+| Snippet | What you get |
+|---|---|
+| `my-icons.toml` | Your picks as a definition, grouped by family, with the licenses noted |
+| `build.rs` | The build script that consumes it |
+| `Cargo.toml` | A `build-dependencies` entry with exactly the features your picks need |
+
+So updating the icons in a project is: open the picker, select, copy, paste.
+Function names are generated with `iced_lucide::function_name`, the same rule
+the build script applies, and names that collide across families — `search`
+turns up in most of them — get a numeric suffix so the definition stays valid.
+
+Every crate in this workspace builds against one pinned iced revision, declared
+once in the root `[workspace.dependencies]` — the colour picker and the examples
+have to agree on it or their `Element` types will not match.
+
+## Migrating from 0.1
+
+- `build_all("icon")` is now `build_all("lucide", "icon")`.
+- `ALL_ICONS` is `&[Icon]` rather than `&[(&str, &str)]`. Each `Icon` carries
+  its own font, which is what makes mixing families possible.
+- `render` takes an `Icon` instead of a codepoint string: `render(*icon)`.
+- Register with `for font in icon::FONTS { app = app.font(*font); }`. `FONT`
+  still exists for single-family modules.
+- `iced_lucide::icons()` and `FONT_BYTES` still work but are deprecated in
+  favour of `family("lucide")`.
+
+## License
+
+MIT for this crate. The vendored icon fonts keep their own licenses — see the
+table above and `assets/<family>/LICENSE`.

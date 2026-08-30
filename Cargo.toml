@@ -1,11 +1,40 @@
 [package]
 name = "iced_lucide"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
-description = "Generate type-safe Lucide icon fonts for `iced` at compile time"
+description = "Generate type-safe, subsetted icon fonts for `iced` at compile time"
 license = "MIT"
+repository = "https://github.com/A-Disruption/iced_lucide"
+documentation = "https://docs.rs/iced_lucide"
 categories = ["gui"]
-keywords = ["gui", "ui", "iced", "icons", "lucide"]
+keywords = ["gui", "ui", "iced", "icons", "fonts"]
+
+# The maintainer tool and the examples are not part of the published crate.
+exclude = ["tools/", "all_icons_example/", "subset_example/"]
+
+[features]
+default = ["lucide"]
+
+lucide = []
+bootstrap = []
+codicon = []
+devicon = []
+fontawesome = []
+nerdfonts = []
+octicons = []
+pomicons = []
+
+# Everything at once. Convenient for icon browsers; heavy for anything else.
+all = [
+  "lucide",
+  "bootstrap",
+  "codicon",
+  "devicon",
+  "fontawesome",
+  "nerdfonts",
+  "octicons",
+  "pomicons",
+]
 
 [dependencies]
 sha2 = "0.10"
@@ -14,8 +43,32 @@ toml = "0.9"
 ttf-parser = "0.25"
 subsetter = "0.2"
 
+[package.metadata.docs.rs]
+all-features = true
+
 [workspace]
-members = ["all_icons_example", "subset_example"]
+members = [
+  "all_icons_example",
+  "icon_picker_example",
+  "subset_example",
+  "tools/vendor",
+]
 
 [workspace.dependencies]
-iced_lucide = { version = "0.1.0", path = "." }
+iced_lucide = { version = "0.2.0", path = "." }
+
+# Pinned to the revision the `widgets` crate builds against, so the whole
+# workspace shares one iced. Two revisions would give the examples a different
+# `Element` type from the one the colour picker returns.
+iced = { git = "https://github.com/iced-rs/iced", rev = "4cad51ba61e3d76a7e696ad5923d675a20994e34", features = [
+  "advanced",
+] }
+
+# The colour picker used by icon_picker_example.
+widgets = { git = "https://github.com/A-Disruption/widgets", features = [
+  "color_picker_two",
+] }
+
+[dev-dependencies]
+# The font database `iced` resolves through, via `cosmic-text`.
+fontdb = "0.23"

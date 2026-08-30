@@ -1,10 +1,27 @@
+# Icons for this example, drawn from four different upstream sets.
+#
+# Each key is the Rust function name that gets generated. Unprefixed values
+# come from Lucide, the default family.
+
 module = "icon"
 
 [icons]
-edit   = "pencil"
-save   = "save"
-trash  = "trash-2"
-search = "search"
-home   = "house"
+edit     = "pencil"
+save     = "save"
+trash    = "trash-2"
+search   = "search"
+home     = "house"
 settings = "settings"
-trash_one  = "trash"
+
+# A "family:" prefix pulls a single icon from somewhere else.
+github = "fa-brands:github"
+heart  = "fa-regular:heart"
+
+# Or group several icons under one family.
+[icons.bootstrap]
+bluetooth = "bluetooth"
+wifi      = "wifi"
+
+[icons.codicon]
+debug     = "debug-alt"
+terminal  = "terminal"

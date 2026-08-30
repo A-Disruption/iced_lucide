@@ -1,4 +1,3 @@
 pub fn main() {
-    println!("cargo::rerun-if-changed=fonts/my-icons.toml");
-    iced_lucide::build_all("icon").expect("Build all icons");
+    iced_lucide::build_all("lucide", "icon").expect("Build all icons");
 }

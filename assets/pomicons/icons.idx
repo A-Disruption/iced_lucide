@@ -1,0 +1,16 @@
+# Pomicons (pomicons)
+# font: https://raw.githubusercontent.com/gabrielelana/pomicons/master/fonts/Pomicons.ttf
+# metadata: https://raw.githubusercontent.com/gabrielelana/pomicons/master/css/pomicons.css
+# license: See vendored LICENSE
+# Regenerate with: cargo run -p vendor -- pomicons
+away	e007
+clean-code	e000
+external-interruption	e00a
+internal-interruption	e009
+long-pause	e006
+pair-programming	e008
+pomodoro-done	e001
+pomodoro-estimated	e002
+pomodoro-squashed	e004
+pomodoro-ticking	e003
+short-pause	e005

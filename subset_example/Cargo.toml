@@ -4,14 +4,8 @@ version = "0.1.1"
 edition = "2024"
 
 [dependencies]
-iced = {
-  git = "https://github.com/iced-rs/iced.git",
-  rev = "ac1b2c7123ad82643482c0b3a4a776246c966697",
-  features = [
-    "advanced"
-  ]
-}
+iced.workspace = true
 
 
 [build-dependencies]
-iced_lucide.workspace = true
+iced_lucide = { workspace = true, features = ["bootstrap", "codicon", "fontawesome"] }

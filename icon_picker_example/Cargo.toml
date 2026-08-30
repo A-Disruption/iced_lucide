@@ -1,0 +1,24 @@
+[package]
+name = "icon_picker_example"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+iced.workspace = true
+widgets.workspace = true
+
+# Used at runtime only for `function_name`, so the exported definition names
+# icons exactly as the build script will. Declared directly rather than
+# inherited because a workspace dependency cannot have its default features
+# turned off by a member — and no families are wanted here, so that the fonts
+# are not embedded a second time alongside the build-dependency's.
+iced_lucide = { path = "..", default-features = false }
+
+[build-dependencies]
+# Every family, so the picker can browse the lot.
+iced_lucide = { workspace = true, features = ["all"] }
+
+[dev-dependencies]
+# Used to prove the exported definition is valid TOML.
+toml = "0.9"
