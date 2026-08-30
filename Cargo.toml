@@ -23,6 +23,13 @@ fontawesome = []
 nerdfonts = []
 octicons = []
 pomicons = []
+material_symbols = []
+material_design_icons = []
+phosphor = []
+tabler = []
+fluent = []
+simple_icons = []
+boxicons = []
 
 # Everything at once. Convenient for icon browsers; heavy for anything else.
 all = [
@@ -34,6 +41,13 @@ all = [
   "nerdfonts",
   "octicons",
   "pomicons",
+  "material_symbols",
+  "material_design_icons",
+  "phosphor",
+  "tabler",
+  "fluent",
+  "simple_icons",
+  "boxicons",
 ]
 
 [dependencies]

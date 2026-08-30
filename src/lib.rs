@@ -26,6 +26,18 @@
 //! | `nerdfonts` | [Nerd Fonts](https://www.nerdfonts.com) | `nerdfonts` | MIT |
 //! | `octicons` | [Octicons](https://primer.style/octicons) (via the Nerd Fonts `oct-` range) | `octicons` | MIT |
 //! | `pomicons` | [Pomicons](https://github.com/gabrielelana/pomicons) | `pomicons` | see vendored LICENSE |
+//! | `material_symbols` | [Material Symbols](https://fonts.google.com/icons) | `material-symbols` | Apache-2.0 |
+//! | `material_design_icons` | [Material Design Icons](https://pictogrammers.com/library/mdi/) | `material-design-icons` | Apache-2.0 |
+//! | `phosphor` | [Phosphor](https://phosphoricons.com) | `phosphor` | MIT |
+//! | `tabler` | [Tabler Icons](https://tabler.io/icons) | `tabler` | MIT |
+//! | `fluent` | [Fluent System Icons](https://github.com/microsoft/fluentui-system-icons) | `fluent` | MIT |
+//! | `simple_icons` | [Simple Icons](https://simpleicons.org) | `simple-icons` | CC0-1.0 |
+//! | `boxicons` | [Boxicons](https://boxicons.com) | `boxicons` | MIT |
+//!
+//! Seventeen families, 52,977 icons. Several carry caveats — Material Symbols
+//! is vendored from its variable font's default instance, Fluent names keep
+//! their pixel size, Boxicons prefixes its solid and logo styles — which the
+//! README sets out in full.
 //!
 //! Enable what you need:
 //!

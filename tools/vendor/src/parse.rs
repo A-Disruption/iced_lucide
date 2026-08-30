@@ -13,11 +13,34 @@ pub fn parse(metadata: &Metadata, raw: &[u8]) -> Result<Icons, String> {
 
     match metadata {
         Metadata::LucideHtml => Ok(lucide_html(&text)),
-        Metadata::FlatJson => flat_json(&text),
-        Metadata::Css { prefix } => Ok(css(&text, prefix)),
+        Metadata::FlatJson {
+            strip_prefix,
+            strip_suffix,
+        } => flat_json(&text, *strip_prefix, *strip_suffix),
+        Metadata::Codepoints => Ok(codepoints(&text)),
+        Metadata::Css { prefixes } => Ok(css(&text, prefixes)),
         Metadata::FontAwesome { style } => font_awesome(&text, style),
         Metadata::NerdFonts { prefix } => nerd_fonts(&text, *prefix),
     }
+}
+
+/// Trim a publisher's namespacing off a name and settle on hyphens.
+///
+/// Upstreams that namespace their keys do it consistently, so a name that does
+/// not carry the prefix is not one of ours and is dropped.
+fn rename(name: &str, strip_prefix: Option<&str>, strip_suffix: Option<&str>) -> Option<String> {
+    let mut trimmed = match strip_prefix {
+        Some(prefix) => name.strip_prefix(prefix)?,
+        None => name,
+    };
+
+    if let Some(suffix) = strip_suffix {
+        trimmed = trimmed.strip_suffix(suffix)?;
+    }
+
+    let renamed = trimmed.replace('_', "-");
+
+    (!renamed.is_empty()).then_some(renamed)
 }
 
 /// Lucide's `unicode.html`, which pairs each name with an HTML entity:
@@ -58,15 +81,39 @@ fn lucide_html(html: &str) -> Icons {
 }
 
 /// A flat `{"icon-name": 61697}` object, as Bootstrap Icons publishes.
-fn flat_json(json: &str) -> Result<Icons, String> {
-    serde_json::from_str::<Icons>(json).map_err(|error| format!("flat JSON: {error}"))
+fn flat_json(
+    json: &str,
+    strip_prefix: Option<&str>,
+    strip_suffix: Option<&str>,
+) -> Result<Icons, String> {
+    let raw: BTreeMap<String, u32> =
+        serde_json::from_str(json).map_err(|error| format!("flat JSON: {error}"))?;
+
+    Ok(raw
+        .into_iter()
+        .filter_map(|(name, codepoint)| {
+            Some((rename(&name, strip_prefix, strip_suffix)?, codepoint))
+        })
+        .collect())
+}
+
+/// Whitespace-separated `name hexcodepoint` lines.
+fn codepoints(text: &str) -> Icons {
+    text.lines()
+        .filter_map(|line| {
+            let (name, code) = line.split_once(char::is_whitespace)?;
+            let codepoint = u32::from_str_radix(code.trim(), 16).ok()?;
+
+            Some((rename(name, None, None)?, codepoint))
+        })
+        .collect()
 }
 
 /// CSS rules of the form `.prefix-name:before { content: "\ea60" }`.
 ///
 /// Selectors may be grouped, in which case every class in the group takes the
 /// block's codepoint — Devicon relies on this, Codicon does not.
-fn css(stylesheet: &str, prefix: &str) -> Icons {
+fn css(stylesheet: &str, prefixes: &[(&str, &str)]) -> Icons {
     let mut icons = Icons::new();
 
     for rule in stylesheet.split('}') {
@@ -78,8 +125,10 @@ fn css(stylesheet: &str, prefix: &str) -> Icons {
             continue;
         };
 
-        for name in css_class_names(selector, prefix) {
-            icons.insert(name, codepoint);
+        for (class_prefix, name_prefix) in prefixes {
+            for name in css_class_names(selector, class_prefix) {
+                icons.insert(format!("{name_prefix}{name}"), codepoint);
+            }
         }
     }
 
@@ -211,7 +260,7 @@ mod tests {
             }
         ";
 
-        let icons = css(stylesheet, "devicon-");
+        let icons = css(stylesheet, &[("devicon-", "")]);
 
         assert_eq!(icons.get("nixos-plain"), Some(&0xe992));
         assert_eq!(icons.get("nixos-plain-wordmark"), Some(&0xe992));
@@ -219,9 +268,52 @@ mod tests {
 
     #[test]
     fn reads_single_line_css_rules() {
-        let icons = css(".codicon-add:before { content: \"\\ea60\" }", "codicon-");
+        let icons = css(
+            ".codicon-add:before { content: \"\\ea60\" }",
+            &[("codicon-", "")],
+        );
 
         assert_eq!(icons.get("add"), Some(&0xea60));
+    }
+
+    /// Boxicons puts three styles in one font, told apart only by class prefix.
+    #[test]
+    fn keeps_styles_apart_when_they_share_a_font() {
+        let stylesheet = "
+            .bx-alarm:before { content: \"\\e900\" }
+            .bxs-alarm:before { content: \"\\e901\" }
+            .bxl-github:before { content: \"\\e902\" }
+        ";
+
+        let icons = css(
+            stylesheet,
+            &[("bx-", ""), ("bxs-", "solid-"), ("bxl-", "logo-")],
+        );
+
+        assert_eq!(icons.get("alarm"), Some(&0xe900));
+        assert_eq!(icons.get("solid-alarm"), Some(&0xe901));
+        assert_eq!(icons.get("logo-github"), Some(&0xe902));
+
+        // `.bxs-alarm` must not also register as the bare `alarm`, which would
+        // silently overwrite the regular style.
+        assert_eq!(icons.len(), 3, "{icons:?}");
+    }
+
+    #[test]
+    fn trims_publisher_namespacing_off_flat_json_keys() {
+        let json = r#"{"ic_fluent_access_time_24_regular": 61697}"#;
+
+        let icons = flat_json(json, Some("ic_fluent_"), Some("_regular")).expect("parses");
+
+        assert_eq!(icons.get("access-time-24"), Some(&61697));
+    }
+
+    #[test]
+    fn reads_codepoint_listings() {
+        let icons = codepoints("10k e951\nairplanemode_active e195\n");
+
+        assert_eq!(icons.get("10k"), Some(&0xe951));
+        assert_eq!(icons.get("airplanemode-active"), Some(&0xe195));
     }
 
     #[test]

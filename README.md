@@ -10,7 +10,7 @@ thousand its upstream publishes.
 No network calls. Every font and its icon index are vendored into the crate.
 
 > **On the name:** this started as a Lucide-only crate and kept its name through
-> the move to ten icon sets, so existing users are not stranded. Lucide is still
+> the move to seventeen icon sets, so existing users are not stranded. Lucide is still
 > the default family.
 
 ## Icon sets
@@ -28,6 +28,16 @@ it asks for.
 | `nerdfonts` | [Nerd Fonts](https://www.nerdfonts.com) | `nerdfonts` | 10995 | MIT |
 | `octicons` | [Octicons](https://primer.style/octicons) | `octicons` | 310 | MIT |
 | `pomicons` | [Pomicons](https://github.com/gabrielelana/pomicons) | `pomicons` | 11 | see vendored `LICENSE` |
+| `material_symbols` | [Material Symbols](https://fonts.google.com/icons) | `material-symbols` | 4275 | Apache-2.0 |
+| `material_design_icons` | [Material Design Icons](https://pictogrammers.com/library/mdi/) | `material-design-icons` | 7447 | Apache-2.0 |
+| `phosphor` | [Phosphor](https://phosphoricons.com) | `phosphor` | 1530 | MIT |
+| `tabler` | [Tabler Icons](https://tabler.io/icons) | `tabler` | 5193 | MIT |
+| `fluent` | [Fluent System Icons](https://github.com/microsoft/fluentui-system-icons) | `fluent` | 9708 | MIT |
+| `simple_icons` | [Simple Icons](https://simpleicons.org) | `simple-icons` | 3457 | CC0-1.0 |
+| `boxicons` | [Boxicons](https://boxicons.com) | `boxicons` | 1634 | MIT |
+
+That is **52,977 icons** across 17 families. Nothing is enabled but Lucide
+unless you ask for it.
 
 Enable what you need:
 
@@ -52,6 +62,18 @@ iced_lucide = { version = "0.2", features = ["bootstrap", "fontawesome"] }
   carries the single-colour `plain` and `line` variants.
 - **Nerd Fonts** — aggregates glyphs from many upstream sets, each under its own
   license. Names keep their upstream prefix (`cod-`, `dev-`, `fa-`, `oct-`, …).
+- **Material Symbols** — Google publishes this only as a four-axis variable
+  font. The vendored copy is its default instance: the Outlined style at weight
+  400. The fill, grade, and optical-size axes do not survive vendoring.
+- **Fluent** — Microsoft draws each icon separately per pixel size, so names
+  keep theirs: `access-time-24`, not `access-time`. This is the Regular style.
+- **Simple Icons** — the font is CC0, but the brand marks in it are trademarks
+  of their owners and the license grants no right to use them.
+- **Boxicons** — regular, solid, and logo styles share one font, so solid and
+  logo names are prefixed: `alarm`, `solid-alarm`, `logo-github`.
+- **Phosphor** — the Regular weight. The other five are separate upstream fonts.
+- **Iconoir is not supported.** It has no icon font — its stylesheet draws every
+  icon from an inline SVG data URI, so there is nothing to subset.
 
 ## Usage
 
@@ -171,7 +193,7 @@ thousand of them.
 ## Browsing several families
 
 For a picker spanning more than one set, `build_index` generates the same
-module *without* the per-icon functions — naming twenty thousand icons in Rust
+module *without* the per-icon functions — naming fifty thousand icons in Rust
 helps nobody:
 
 ```rust
@@ -244,11 +266,11 @@ what is already there. Adding a new icon set means appending an entry to
 ```bash
 cargo run -p subset_example        # several families in one module
 cargo run -p all_icons_example     # a grid of every Lucide icon
-cargo run -p icon_picker_example   # browse all ten families
+cargo run -p icon_picker_example   # browse all 17 families
 ```
 
 `icon_picker_example` is the one to reach for when deciding what to use: search
-across all 19,733 icons, filter by family, click to collect them in a side
+across all 52,977 icons, filter by family, click to collect them in a side
 panel, and recolour the lot. Custom colours come from the
 [`color_picker_two`](https://github.com/A-Disruption/widgets) widget.
 

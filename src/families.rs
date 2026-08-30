@@ -171,6 +171,121 @@ pub(crate) const POMICONS: Family = Family {
     index: include_str!("../assets/pomicons/icons.idx"),
 };
 
+/// [Material Symbols](https://fonts.google.com/icons) — Apache-2.0.
+///
+/// The Outlined style at weight 400. Upstream is a variable font whose
+/// other axes — fill, grade, optical size — do not survive vendoring.
+#[cfg(feature = "material_symbols")]
+pub(crate) const MATERIAL_SYMBOLS: Family = Family {
+    id: "material-symbols",
+    label: "Material Symbols",
+    feature: "material_symbols",
+    font_family: "material-symbols",
+    file_stem: "material-symbols-outlined",
+    browse_url: "https://fonts.google.com/icons",
+    license: "Apache-2.0",
+    font: include_bytes!("../assets/material-symbols/material-symbols-outlined.ttf"),
+    index: include_str!("../assets/material-symbols/icons.idx"),
+};
+
+/// [Material Design Icons](https://pictogrammers.com/library/mdi/) — Apache-2.0.
+///
+/// The Pictogrammers set, distinct from Google's Material Symbols.
+#[cfg(feature = "material_design_icons")]
+pub(crate) const MATERIAL_DESIGN_ICONS: Family = Family {
+    id: "material-design-icons",
+    label: "Material Design Icons",
+    feature: "material_design_icons",
+    font_family: "material-design-icons",
+    file_stem: "materialdesignicons",
+    browse_url: "https://pictogrammers.com/library/mdi/",
+    license: "Apache-2.0",
+    font: include_bytes!("../assets/material-design-icons/materialdesignicons.ttf"),
+    index: include_str!("../assets/material-design-icons/icons.idx"),
+};
+
+/// [Phosphor](https://phosphoricons.com) — MIT.
+///
+/// The Regular weight. Phosphor's other weights are separate fonts; adding
+/// one is a matter of another entry here.
+#[cfg(feature = "phosphor")]
+pub(crate) const PHOSPHOR: Family = Family {
+    id: "phosphor",
+    label: "Phosphor",
+    feature: "phosphor",
+    font_family: "phosphor",
+    file_stem: "phosphor",
+    browse_url: "https://phosphoricons.com",
+    license: "MIT",
+    font: include_bytes!("../assets/phosphor/phosphor.ttf"),
+    index: include_str!("../assets/phosphor/icons.idx"),
+};
+
+/// [Tabler Icons](https://tabler.io/icons) — MIT.
+#[cfg(feature = "tabler")]
+pub(crate) const TABLER: Family = Family {
+    id: "tabler",
+    label: "Tabler Icons",
+    feature: "tabler",
+    font_family: "tabler-icons",
+    file_stem: "tabler-icons",
+    browse_url: "https://tabler.io/icons",
+    license: "MIT",
+    font: include_bytes!("../assets/tabler/tabler-icons.ttf"),
+    index: include_str!("../assets/tabler/icons.idx"),
+};
+
+/// [Fluent System Icons](https://github.com/microsoft/fluentui-system-icons) — MIT.
+///
+/// The Regular style. Fluent draws each icon separately per size, so names
+/// keep their pixel size: `access-time-24` rather than `access-time`.
+#[cfg(feature = "fluent")]
+pub(crate) const FLUENT: Family = Family {
+    id: "fluent",
+    label: "Fluent System Icons",
+    feature: "fluent",
+    font_family: "fluent-system-icons",
+    file_stem: "fluent-system-icons",
+    browse_url: "https://github.com/microsoft/fluentui-system-icons",
+    license: "MIT",
+    font: include_bytes!("../assets/fluent/fluent-system-icons.ttf"),
+    index: include_str!("../assets/fluent/icons.idx"),
+};
+
+/// [Simple Icons](https://simpleicons.org) — CC0-1.0.
+///
+/// Brand marks. The font is CC0, but the logos are trademarks of their
+/// owners and the license grants no right to use them.
+#[cfg(feature = "simple_icons")]
+pub(crate) const SIMPLE_ICONS: Family = Family {
+    id: "simple-icons",
+    label: "Simple Icons",
+    feature: "simple_icons",
+    font_family: "simple-icons",
+    file_stem: "simple-icons",
+    browse_url: "https://simpleicons.org",
+    license: "CC0-1.0",
+    font: include_bytes!("../assets/simple-icons/simple-icons.ttf"),
+    index: include_str!("../assets/simple-icons/icons.idx"),
+};
+
+/// [Boxicons](https://boxicons.com) — MIT.
+///
+/// The regular, solid, and logo styles share one font; solid and logo names
+/// are prefixed `solid-` and `logo-` so they do not collide.
+#[cfg(feature = "boxicons")]
+pub(crate) const BOXICONS: Family = Family {
+    id: "boxicons",
+    label: "Boxicons",
+    feature: "boxicons",
+    font_family: "boxicons",
+    file_stem: "boxicons",
+    browse_url: "https://boxicons.com",
+    license: "MIT",
+    font: include_bytes!("../assets/boxicons/boxicons.ttf"),
+    index: include_str!("../assets/boxicons/icons.idx"),
+};
+
 /// Every family enabled by the current feature set, in declaration order.
 // Each push is behind its own `cfg`, so they cannot be collapsed into the
 // initialiser the way the lint suggests.
@@ -199,6 +314,20 @@ pub(crate) fn enabled() -> Vec<&'static Family> {
     families.push(&OCTICONS);
     #[cfg(feature = "pomicons")]
     families.push(&POMICONS);
+    #[cfg(feature = "material_symbols")]
+    families.push(&MATERIAL_SYMBOLS);
+    #[cfg(feature = "material_design_icons")]
+    families.push(&MATERIAL_DESIGN_ICONS);
+    #[cfg(feature = "phosphor")]
+    families.push(&PHOSPHOR);
+    #[cfg(feature = "tabler")]
+    families.push(&TABLER);
+    #[cfg(feature = "fluent")]
+    families.push(&FLUENT);
+    #[cfg(feature = "simple_icons")]
+    families.push(&SIMPLE_ICONS);
+    #[cfg(feature = "boxicons")]
+    families.push(&BOXICONS);
 
     families
 }

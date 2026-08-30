@@ -10,9 +10,26 @@ pub enum Metadata {
     /// Lucide's `unicode.html`: `<h4>name</h4> ... &amp;#57347;`
     LucideHtml,
     /// A flat `{"icon-name": 61697}` JSON object.
-    FlatJson,
+    ///
+    /// Some publishers namespace every key and tack the style on the end —
+    /// Fluent writes `ic_fluent_access_time_24_regular` — so both ends can be
+    /// trimmed off. Underscores become hyphens either way.
+    FlatJson {
+        strip_prefix: Option<&'static str>,
+        strip_suffix: Option<&'static str>,
+    },
+    /// Whitespace-separated `name codepoint` lines, as Google publishes
+    /// alongside the Material Symbols fonts.
+    Codepoints,
     /// CSS rules of the form `.prefix-name:before { content: "\ea60" }`.
-    Css { prefix: &'static str },
+    ///
+    /// Each entry pairs the class prefix to look for with the prefix to give
+    /// the resulting name. Families that ship several styles in one font need
+    /// this: Boxicons writes `.bx-`, `.bxs-`, and `.bxl-` for its regular,
+    /// solid, and logo sets, which would otherwise collide on the bare name.
+    Css {
+        prefixes: &'static [(&'static str, &'static str)],
+    },
     /// Font Awesome's `metadata/icons.json`, filtered to one style.
     FontAwesome { style: &'static str },
     /// Nerd Fonts' `glyphnames.json`.
@@ -57,9 +74,17 @@ pub struct Source {
     pub license_url: Option<&'static str>,
     /// Cut the vendored font down to the glyphs its index names.
     ///
-    /// Only worth it when a family is carved out of a much larger font: without
-    /// this, taking 310 Octicons out of Symbols Nerd Font would vendor a second
-    /// 2.5 MB copy of that font.
+    /// Two things make this worth doing. A family carved out of a larger font
+    /// needs it to exist at all: taking 310 Octicons out of Symbols Nerd Font
+    /// would otherwise vendor a second 2.5 MB copy. And it drops the layout
+    /// tables nothing here uses — glyphs are always addressed by codepoint, so
+    /// ligatures and kerning are dead weight. That is what takes Material
+    /// Symbols from a 10.6 MB variable font to 805 KB.
+    ///
+    /// It is not a free win. Rebuilding the character map as format 12 costs
+    /// twelve bytes per glyph, which for a font with a dense format 4 map and
+    /// little layout data to shed — Nerd Fonts, Devicon, Boxicons — comes out
+    /// larger than it started. Measure before turning it on.
     pub trim_to_index: bool,
     /// Extra caveats recorded in the vendored index and the generated docs.
     pub note: Option<&'static str>,
@@ -93,7 +118,10 @@ pub const SOURCES: &[Source] = &[
         font_url: "https://cdn.jsdelivr.net/npm/bootstrap-icons/font/fonts/bootstrap-icons.woff",
         container: Container::Woff,
         metadata_url: "https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.json",
-        metadata: Metadata::FlatJson,
+        metadata: Metadata::FlatJson {
+            strip_prefix: None,
+            strip_suffix: None,
+        },
         license_url: Some("https://raw.githubusercontent.com/twbs/icons/main/LICENSE"),
         trim_to_index: false,
         note: Some(
@@ -112,7 +140,9 @@ pub const SOURCES: &[Source] = &[
         font_url: "https://cdn.jsdelivr.net/npm/@vscode/codicons/dist/codicon.ttf",
         container: Container::Sfnt,
         metadata_url: "https://cdn.jsdelivr.net/npm/@vscode/codicons/dist/codicon.css",
-        metadata: Metadata::Css { prefix: "codicon-" },
+        metadata: Metadata::Css {
+            prefixes: &[("codicon-", "")],
+        },
         license_url: Some(
             "https://raw.githubusercontent.com/microsoft/vscode-codicons/main/LICENSE",
         ),
@@ -132,7 +162,9 @@ pub const SOURCES: &[Source] = &[
         // The package root also ships a `devicon.css`, but it carries only the
         // most recent additions — the minified build is the complete set.
         metadata_url: "https://cdn.jsdelivr.net/npm/devicon/devicon.min.css",
-        metadata: Metadata::Css { prefix: "devicon-" },
+        metadata: Metadata::Css {
+            prefixes: &[("devicon-", "")],
+        },
         license_url: Some("https://raw.githubusercontent.com/devicons/devicon/master/LICENSE"),
         trim_to_index: false,
         note: Some(
@@ -264,9 +296,163 @@ pub const SOURCES: &[Source] = &[
         font_url: "https://raw.githubusercontent.com/gabrielelana/pomicons/master/fonts/Pomicons.ttf",
         container: Container::Sfnt,
         metadata_url: "https://raw.githubusercontent.com/gabrielelana/pomicons/master/css/pomicons.css",
-        metadata: Metadata::Css { prefix: "pi-" },
+        metadata: Metadata::Css {
+            prefixes: &[("pi-", "")],
+        },
         license_url: Some("https://raw.githubusercontent.com/gabrielelana/pomicons/master/LICENSE"),
         trim_to_index: false,
         note: None,
+    },
+    Source {
+        id: "material-symbols",
+        label: "Material Symbols",
+        feature: "material_symbols",
+        font_family: "material-symbols",
+        file_stem: "material-symbols-outlined",
+        browse_url: "https://fonts.google.com/icons",
+        license: "Apache-2.0",
+        // Google publishes Material Symbols only as a four-axis variable font.
+        // Trimming resolves it to its default instance — weight 400, unfilled —
+        // which is the shape the static builds carry anyway.
+        font_url: "https://raw.githubusercontent.com/google/material-design-icons/master/variablefont/MaterialSymbolsOutlined%5BFILL%2CGRAD%2Copsz%2Cwght%5D.ttf",
+        container: Container::Sfnt,
+        metadata_url: "https://raw.githubusercontent.com/google/material-design-icons/master/variablefont/MaterialSymbolsOutlined%5BFILL%2CGRAD%2Copsz%2Cwght%5D.codepoints",
+        metadata: Metadata::Codepoints,
+        license_url: Some(
+            "https://raw.githubusercontent.com/google/material-design-icons/master/LICENSE",
+        ),
+        trim_to_index: true,
+        note: Some(
+            "The Outlined style at weight 400. Upstream is a variable font whose other \
+             axes — fill, grade, optical size — do not survive vendoring.",
+        ),
+    },
+    Source {
+        id: "material-design-icons",
+        label: "Material Design Icons",
+        feature: "material_design_icons",
+        font_family: "material-design-icons",
+        file_stem: "materialdesignicons",
+        browse_url: "https://pictogrammers.com/library/mdi/",
+        license: "Apache-2.0",
+        font_url: "https://cdn.jsdelivr.net/npm/@mdi/font/fonts/materialdesignicons-webfont.ttf",
+        container: Container::Sfnt,
+        metadata_url: "https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.css",
+        metadata: Metadata::Css {
+            prefixes: &[("mdi-", "")],
+        },
+        license_url: Some(
+            "https://raw.githubusercontent.com/Templarian/MaterialDesign-Webfont/master/LICENSE",
+        ),
+        trim_to_index: true,
+        note: Some("The Pictogrammers set, distinct from Google's Material Symbols."),
+    },
+    Source {
+        id: "phosphor",
+        label: "Phosphor",
+        feature: "phosphor",
+        font_family: "phosphor",
+        file_stem: "phosphor",
+        browse_url: "https://phosphoricons.com",
+        license: "MIT",
+        font_url: "https://cdn.jsdelivr.net/npm/@phosphor-icons/web/src/regular/Phosphor.ttf",
+        container: Container::Sfnt,
+        metadata_url: "https://cdn.jsdelivr.net/npm/@phosphor-icons/web/src/regular/style.css",
+        metadata: Metadata::Css {
+            prefixes: &[("ph-", "")],
+        },
+        license_url: Some("https://raw.githubusercontent.com/phosphor-icons/web/master/LICENSE"),
+        trim_to_index: true,
+        note: Some(
+            "The Regular weight. Phosphor's other weights are separate fonts; adding one \
+             is a matter of another entry here.",
+        ),
+    },
+    Source {
+        id: "tabler",
+        label: "Tabler Icons",
+        feature: "tabler",
+        font_family: "tabler-icons",
+        file_stem: "tabler-icons",
+        browse_url: "https://tabler.io/icons",
+        license: "MIT",
+        font_url: "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont/dist/fonts/tabler-icons.ttf",
+        container: Container::Sfnt,
+        metadata_url: "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont/dist/tabler-icons.css",
+        metadata: Metadata::Css {
+            prefixes: &[("ti-", "")],
+        },
+        license_url: Some("https://raw.githubusercontent.com/tabler/tabler-icons/main/LICENSE"),
+        trim_to_index: true,
+        note: None,
+    },
+    Source {
+        id: "fluent",
+        label: "Fluent System Icons",
+        feature: "fluent",
+        font_family: "fluent-system-icons",
+        file_stem: "fluent-system-icons",
+        browse_url: "https://github.com/microsoft/fluentui-system-icons",
+        license: "MIT",
+        font_url: "https://raw.githubusercontent.com/microsoft/fluentui-system-icons/main/fonts/FluentSystemIcons-Regular.ttf",
+        container: Container::Sfnt,
+        metadata_url: "https://raw.githubusercontent.com/microsoft/fluentui-system-icons/main/fonts/FluentSystemIcons-Regular.json",
+        metadata: Metadata::FlatJson {
+            strip_prefix: Some("ic_fluent_"),
+            strip_suffix: Some("_regular"),
+        },
+        license_url: Some(
+            "https://raw.githubusercontent.com/microsoft/fluentui-system-icons/main/LICENSE",
+        ),
+        trim_to_index: true,
+        note: Some(
+            "The Regular style. Fluent draws each icon separately per size, so names keep \
+             their pixel size: `access-time-24` rather than `access-time`.",
+        ),
+    },
+    Source {
+        id: "simple-icons",
+        label: "Simple Icons",
+        feature: "simple_icons",
+        font_family: "simple-icons",
+        file_stem: "simple-icons",
+        browse_url: "https://simpleicons.org",
+        license: "CC0-1.0",
+        font_url: "https://cdn.jsdelivr.net/npm/simple-icons-font/font/SimpleIcons.ttf",
+        container: Container::Sfnt,
+        metadata_url: "https://cdn.jsdelivr.net/npm/simple-icons-font/font/simple-icons.css",
+        metadata: Metadata::Css {
+            prefixes: &[("si-", "")],
+        },
+        license_url: Some(
+            "https://raw.githubusercontent.com/simple-icons/simple-icons-font/develop/LICENSE.md",
+        ),
+        trim_to_index: true,
+        note: Some(
+            "Brand marks. The font is CC0, but the logos are trademarks of their owners \
+             and the license grants no right to use them.",
+        ),
+    },
+    Source {
+        id: "boxicons",
+        label: "Boxicons",
+        feature: "boxicons",
+        font_family: "boxicons",
+        file_stem: "boxicons",
+        browse_url: "https://boxicons.com",
+        license: "MIT",
+        font_url: "https://cdn.jsdelivr.net/npm/boxicons/fonts/boxicons.ttf",
+        container: Container::Sfnt,
+        metadata_url: "https://cdn.jsdelivr.net/npm/boxicons/css/boxicons.css",
+        // Three styles share one font, separated only by class prefix.
+        metadata: Metadata::Css {
+            prefixes: &[("bx-", ""), ("bxs-", "solid-"), ("bxl-", "logo-")],
+        },
+        license_url: Some("https://raw.githubusercontent.com/atisawd/boxicons/master/LICENSE"),
+        trim_to_index: false,
+        note: Some(
+            "The regular, solid, and logo styles share one font; solid and logo names are \
+             prefixed `solid-` and `logo-` so they do not collide.",
+        ),
     },
 ];
