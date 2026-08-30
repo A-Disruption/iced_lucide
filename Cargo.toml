@@ -62,11 +62,11 @@ all = [
 ]
 
 [dependencies]
-sha2 = "0.10"
-serde = { version = "1", features = ["derive"] }
-toml = "0.9"
+sha2 = "0.11.0"
+serde = { version = "1.0.229", features = ["derive"] }
+toml = "1.1.4"
 ttf-parser = "0.25"
-subsetter = "0.2"
+subsetter = "0.2.6"
 
 [package.metadata.docs.rs]
 all-features = true
@@ -96,4 +96,4 @@ widgets = { git = "https://github.com/A-Disruption/widgets", features = [
 
 [dev-dependencies]
 # The font database `iced` resolves through, via `cosmic-text`.
-fontdb = "0.23"
+fontdb = "0.24.0"

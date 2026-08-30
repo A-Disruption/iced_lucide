@@ -732,6 +732,7 @@ fn sanitize_fn_name(name: &str) -> String {
 /// A hash of the resolved icon list, used to skip regeneration.
 fn compute_hash(icons: &[Resolved]) -> String {
     use sha2::Digest as _;
+    use std::fmt::Write as _;
 
     // Ordered so the hash does not depend on how the definition was written.
     let ordered: BTreeMap<(&str, &str, &str), &Resolved> = icons
@@ -764,7 +765,19 @@ fn compute_hash(icons: &[Resolved]) -> String {
         hasher.update(b"|");
     }
 
-    format!("{:x}", hasher.finalize())
+    let digest = hasher.finalize();
+
+    // Written out a byte at a time rather than with `{:x}`: `sha2` 0.11 returns
+    // a `hybrid_array::Array`, which — unlike the `GenericArray` it replaced —
+    // does not implement `LowerHex`.
+    digest.iter().fold(
+        String::with_capacity(digest.len() * 2),
+        |mut hex, byte| {
+            // Writing to a `String` cannot fail.
+            let _ = write!(hex, "{byte:02x}");
+            hex
+        },
+    )
 }
 
 // ---------------------------------------------------------------------------
