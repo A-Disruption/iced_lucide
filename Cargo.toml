@@ -82,10 +82,7 @@ members = [
 [workspace.dependencies]
 iced_lucide = { version = "0.2.0", path = "." }
 
-# Pinned to the revision the `widgets` crate builds against, so the whole
-# workspace shares one iced. Two revisions would give the examples a different
-# `Element` type from the one the colour picker returns.
-iced = { git = "https://github.com/iced-rs/iced", rev = "4cad51ba61e3d76a7e696ad5923d675a20994e34", features = [
+iced = { version = "0.15.0-dev", features = [
   "advanced",
 ] }
 
@@ -93,6 +90,19 @@ iced = { git = "https://github.com/iced-rs/iced", rev = "4cad51ba61e3d76a7e696ad
 widgets = { git = "https://github.com/A-Disruption/widgets", features = [
   "popover",
 ] }
+
+# The examples and `widgets` both ask for `iced 0.15.0-dev` by version rather
+# than by git url, so both resolve through here to one checkout — which is what
+# keeps the examples' `Element` the same type as the one the popover returns.
+# Pinning the same revision in both crates was the old way of getting that, and
+# it meant `widgets` had to be republished before this workspace could move.
+#
+# Only the examples use iced; the published crate itself does not depend on it,
+# and cargo ignores `[patch]` in a dependency's manifest, so nothing here
+# reaches anyone who depends on `iced_lucide`. Aim it at another branch, a fork,
+# or a local checkout to build the examples against something else.
+[patch.crates-io]
+iced = { git = "https://github.com/iced-rs/iced.git", branch = "master" }
 
 [dev-dependencies]
 # The font database `iced` resolves through, via `cosmic-text`.
