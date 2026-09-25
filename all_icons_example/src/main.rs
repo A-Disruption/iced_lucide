@@ -10,7 +10,7 @@ fn main() -> iced::Result {
         iced::application(Example::default, Example::update, Example::view).title("Lucide Icons");
 
     for font in icon::FONTS {
-        app = app.font(*font);
+        app = app.fonts([*font]);
     }
 
     app.run()

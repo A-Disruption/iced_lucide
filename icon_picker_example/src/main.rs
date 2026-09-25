@@ -91,7 +91,7 @@ fn main() -> iced::Result {
 
     // One subset font per family; every one has to be registered.
     for font in icon::FONTS {
-        app = app.font(*font);
+        app = app.fonts([*font]);
     }
 
     app.run()
@@ -273,7 +273,11 @@ impl Picker {
                 return match slide.snap {
                     // Sliding the window moves the icons under the cursor, so
                     // the view is nudged back by as much as it shifted.
-                    Some(y) => operation::snap_to(GRID, scrollable::RelativeOffset { x: 0.0, y }),
+                    Some(y) => operation::snap_to(
+                        GRID,
+                        scrollable::RelativeOffset { x: 0.0, y },
+                        operation::Animation::Instant,
+                    ),
                     None => Task::none(),
                 };
             }
@@ -497,7 +501,7 @@ impl Picker {
                 // of the panel beside it.
                 scrollable(self.grid())
                     // Reaching either end of the window slides it along.
-                    .on_scroll(Message::Scrolled)
+                    .on_scroll(|scroll| Message::Scrolled(scroll.viewport))
                     .id(GRID)
                     .width(Length::Fill)
                     .height(Length::Fill),

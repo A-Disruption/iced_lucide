@@ -156,7 +156,7 @@ fn main() -> iced::Result {
     let mut app = iced::application(App::default, App::update, App::view);
 
     for font in icon::FONTS {
-        app = app.font(*font);
+        app = app.fonts([*font]);
     }
 
     app.run()
@@ -331,7 +331,7 @@ have to agree on it or their `Element` types will not match.
 - `ALL_ICONS` is `&[Icon]` rather than `&[(&str, &str)]`. Each `Icon` carries
   its own font, which is what makes mixing families possible.
 - `render` takes an `Icon` instead of a codepoint string: `render(*icon)`.
-- Register with `for font in icon::FONTS { app = app.font(*font); }`. `FONT`
+- Register with `for font in icon::FONTS { app = app.fonts([*font]); }`. `FONT`
   still exists for single-family modules.
 - `iced_lucide::icons()` and `FONT_BYTES` still work but are deprecated in
   favour of `family("lucide")`.

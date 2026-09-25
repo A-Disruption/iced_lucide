@@ -9,7 +9,7 @@ fn main() -> iced::Result {
 
     // Each family contributes its own subset font, so register them all.
     for font in icon::FONTS {
-        app = app.font(*font);
+        app = app.fonts([*font]);
     }
 
     app.run()

@@ -103,8 +103,9 @@
 //!     let mut app = iced::application(App::default, App::update, App::view);
 //!
 //!     for font in icon::FONTS {
-//!         app = app.font(*font);
+//!         app = app.fonts([*font]);
 //!     }
+
 //!
 //!     app.run()
 //! }
@@ -752,6 +753,8 @@ fn compute_hash(icons: &[Resolved]) -> String {
     // change the shape of the emitted module even when the selection has not
     // moved, and a stale module then fails to compile against the new one.
     hasher.update(env!("CARGO_PKG_VERSION").as_bytes());
+    hasher.update(b"|");
+    hasher.update(codegen::TEMPLATE_REVISION.as_bytes());
     hasher.update(b"|");
 
     for ((_, _, function), icon) in ordered {
