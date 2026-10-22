@@ -1,6 +1,7 @@
 mod icon;
 
 use iced::Element;
+use iced::Widget as _;
 use iced::widget::{button, column, row, text};
 
 fn main() -> iced::Result {
@@ -56,9 +57,7 @@ impl Example {
         // ALL_ICONS carries the font alongside each codepoint, so a picker can
         // render icons from several families without tracking which is which.
         let every = row(icon::ALL_ICONS.iter().map(|icon| {
-            button(icon::render(*icon))
-                .on_press(Message::IconSelected(icon.name.to_string()))
-                .into()
+            button(icon::render(*icon)).on_press(Message::IconSelected(icon.name.to_string()))
         }))
         .spacing(8);
 
@@ -72,6 +71,6 @@ impl Example {
         ]
         .spacing(12)
         .padding(20)
-        .into()
+        .boxed()
     }
 }

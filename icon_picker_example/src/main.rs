@@ -10,6 +10,7 @@
 
 mod icon;
 
+use iced::Widget as _;
 use std::collections::BTreeSet;
 use std::fmt;
 use std::sync::LazyLock;
@@ -273,7 +274,7 @@ impl Picker {
                 return match slide.snap {
                     // Sliding the window moves the icons under the cursor, so
                     // the view is nudged back by as much as it shifted.
-                    Some(y) => operation::snap_to(
+                    Some(y) => operation::scrollable::snap_to(
                         GRID,
                         scrollable::RelativeOffset { x: 0.0, y },
                         operation::Animation::Instant,
@@ -511,7 +512,7 @@ impl Picker {
         ]
         .spacing(12)
         .padding(16)
-        .into()
+        .boxed()
     }
 
     fn toolbar(&self) -> Element<'_, Message> {
@@ -542,7 +543,7 @@ impl Picker {
         ]
         .spacing(10)
         .align_y(Vertical::Center)
-        .into()
+        .boxed()
     }
 
     /// One chip showing the current icon colour; pressing it offers the rest.
@@ -575,7 +576,7 @@ impl Picker {
             .min_width(COLOUR_LIST_WIDTH)
             .max_width(COLOUR_LIST_WIDTH)
             .padding(12.0)
-            .into()
+            .boxed()
     }
 
     /// A dropdown that checks off as many families as you like.
@@ -603,11 +604,11 @@ impl Picker {
                 // A fixed-width slot keeps the labels aligned whether or not
                 // the row is ticked.
                 let tick: Element<'_, Message> = if !on {
-                    text("").into()
+                    text("").boxed()
                 } else if let Some(mark) = *CHECKMARK {
-                    icon::render(mark).size(13.0).into()
+                    icon::render(mark).size(13.0).boxed()
                 } else {
-                    text("✓").size(13).into()
+                    text("✓").size(13).boxed()
                 };
 
                 button(
@@ -622,14 +623,14 @@ impl Picker {
                 .padding([5, 8])
                 .on_press(Message::ToggleFamily(family.id))
                 .style(selectable(on))
-                .into()
+                .boxed()
             })
             .collect();
 
         let body: Element<'_, Message> = if rows.is_empty() {
             container(text("No family matches that.").size(12))
                 .padding(8)
-                .into()
+                .boxed()
         } else {
             scrollable(column(rows).spacing(6).padding(Padding {
                 right: SCROLLBAR_CLEARANCE,
@@ -637,7 +638,7 @@ impl Picker {
             }))
             // Fixed, so filtering the list does not resize the popover.
             .height(Length::Fixed(320.0))
-            .into()
+            .boxed()
         };
 
         let heading = match self.families.len() {
@@ -668,7 +669,7 @@ impl Picker {
             .min_width(FAMILY_LIST_WIDTH)
             .max_width(FAMILY_LIST_WIDTH)
             .padding(12.0)
-            .into()
+            .boxed()
     }
 
     fn grid(&self) -> Element<'_, Message> {
@@ -694,14 +695,14 @@ impl Picker {
                         .padding(5),
                     tooltip::Position::Top,
                 )
-                .into()
+                .boxed()
             })
             .collect();
 
         if cells.is_empty() {
             return container(text("Nothing matches that search.").size(14))
                 .padding(24)
-                .into();
+                .boxed();
         }
 
         Row::with_children(cells)
@@ -712,7 +713,7 @@ impl Picker {
                 ..Padding::ZERO
             })
             .wrap()
-            .into()
+            .boxed()
     }
 
     /// The picked icons, and the snippets that carry them into a project.
@@ -741,7 +742,7 @@ impl Picker {
         .width(Length::Fixed(380.0))
         .height(Length::Fill)
         .style(container::bordered_box)
-        .into()
+        .boxed()
     }
 
     fn selection_list(&self) -> Element<'_, Message> {
@@ -758,7 +759,7 @@ impl Picker {
         let body: Element<'_, Message> = if self.selected.is_empty() {
             text("Click an icon to keep track of it here.")
                 .size(12)
-                .into()
+                .boxed()
         } else {
             let names = self.function_names();
 
@@ -785,7 +786,7 @@ impl Picker {
                     ]
                     .spacing(10)
                     .align_y(Vertical::Center)
-                    .into()
+                    .boxed()
                 })
                 .collect();
 
@@ -794,13 +795,13 @@ impl Picker {
                 ..Padding::ZERO
             }))
             .height(Length::Fill)
-            .into()
+            .boxed()
         };
 
         column![header, body]
             .spacing(10)
             .height(Length::Fill)
-            .into()
+            .boxed()
     }
 
     /// Copyable snippets for wiring the selection into a project.
@@ -832,8 +833,10 @@ impl Picker {
             *COPY_ICON
         };
         let face: Element<'_, Message> = match mark {
-            Some(glyph) => icon::render(glyph).size(16.0).into(),
-            None => text(if self.copied { "✓" } else { "Copy" }).size(13).into(),
+            Some(glyph) => icon::render(glyph).size(16.0).boxed(),
+            None => text(if self.copied { "✓" } else { "Copy" })
+                .size(13)
+                .boxed(),
         };
 
         let copy = tooltip(
@@ -859,7 +862,7 @@ impl Picker {
             preview,
         ]
         .spacing(8)
-        .into()
+        .boxed()
     }
 }
 
@@ -869,7 +872,7 @@ fn chip(label: &str, active: bool, message: Message) -> Element<'_, Message> {
         .padding([4, 10])
         .on_press(message)
         .style(toggled(active))
-        .into()
+        .boxed()
 }
 
 /// Style for a control that can be on or off.
@@ -1022,7 +1025,7 @@ fn swatch<'a>(fill: Option<Color>, active: bool, message: Message) -> Element<'a
                 ..Default::default()
             }
         })
-        .into()
+        .boxed()
 }
 
 /// A handful of colours to try without opening the picker.

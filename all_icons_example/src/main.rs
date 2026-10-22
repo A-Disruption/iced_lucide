@@ -1,6 +1,7 @@
 mod icon;
 
 use iced::Element;
+use iced::Widget as _;
 use iced::widget::{Row, button, container, scrollable, text, tooltip};
 
 use crate::icon::ALL_ICONS;
@@ -45,7 +46,7 @@ impl Example {
                         .padding(5),
                     tooltip::Position::Top,
                 )
-                .into()
+                .boxed()
             })
             .collect();
 
@@ -55,6 +56,6 @@ impl Example {
                 .padding(10)
                 .wrap(),
         )
-        .into()
+        .boxed()
     }
 }

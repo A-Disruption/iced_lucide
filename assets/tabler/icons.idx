@@ -67,6 +67,8 @@ air-balloon	f4a6
 air-conditioning	f3a2
 air-conditioning-disabled	f542
 air-traffic-control	fb01
+airpods-l	102a0
+airpods-r	1029f
 alarm	ea04
 alarm-average	fc9e
 alarm-minus	f630
@@ -112,13 +114,18 @@ align-justified	ea08
 align-left	ea09
 align-left-2	ff00
 align-right	ea0a
-align-right-2	feff
+align-right-2	1028e
 alpha	f543
 alphabet-arabic	ff2f
 alphabet-bangla	ff2e
+alphabet-chinese	102c5
 alphabet-cyrillic	f1df
+alphabet-devanagari	102c4
+alphabet-ethiopic	102c3
+alphabet-georgian	102c2
 alphabet-greek	f1e0
 alphabet-hebrew	ff2d
+alphabet-japanese	102c1
 alphabet-korean	ff2c
 alphabet-latin	f1e1
 alphabet-polish	101b1
@@ -535,6 +542,7 @@ blend-mode	feb0
 blender	fca2
 blind	101af
 blob	feaf
+blob-dashed	102c0
 blockquote	ee09
 blocks	100b2
 bluetooth	ea37
@@ -1226,6 +1234,7 @@ cash-banknote-move	10145
 cash-banknote-move-back	10146
 cash-banknote-off	ee24
 cash-banknote-plus	10144
+cash-coin	1029e
 cash-edit	10143
 cash-heart	10142
 cash-minus	10141
@@ -1446,6 +1455,7 @@ circle-dotted-letter-z	ff66
 circle-half	ee3f
 circle-half-2	eff3
 circle-half-vertical	ee3e
+circle-heart	102bf
 circle-key	f633
 circle-letter-a	f441
 circle-letter-b	f442
@@ -1490,13 +1500,16 @@ circle-open-arrow-down	10209
 circle-open-arrow-left	10208
 circle-open-arrow-right	10207
 circle-open-arrow-up	10206
+circle-pause	102be
 circle-percentage	fd7b
+circle-play	102bd
 circle-plus	ea69
 circle-plus-2	fc8d
 circle-plus-minus	10205
 circle-rectangle	f010
 circle-rectangle-off	f0cd
 circle-square	ece4
+circle-stop	102bc
 circle-triangle	f011
 circle-x	ea6a
 circles	ece5
@@ -2176,6 +2189,7 @@ droplets	fc12
 dual-screen	fa59
 dumbbell	1024d
 dumpling	feb5
+duplicate	102b2
 e-passport	f4df
 ear	ebce
 ear-off	ee84
@@ -2188,6 +2202,7 @@ ease-in-out-control-points	f571
 ease-out	f575
 ease-out-control-point	f574
 edit	ea98
+edit-bulk	1029d
 edit-circle	ee85
 edit-circle-off	f11d
 edit-off	f11e
@@ -2312,6 +2327,7 @@ file-invoice	eb67
 file-isr	feac
 file-lambda	f53f
 file-like	ed2b
+file-lock	102bb
 file-minus	ea9e
 file-music	ea9f
 file-neutral	fd22
@@ -2488,6 +2504,7 @@ fold	ed56
 fold-down	ed54
 fold-up	ed55
 folder	eaad
+folder-ai	102b1
 folder-bolt	f90c
 folder-cancel	f90d
 folder-check	f90e
@@ -2497,6 +2514,7 @@ folder-dollar	f911
 folder-down	f912
 folder-exclamation	f913
 folder-heart	f914
+folder-lock	102ba
 folder-minus	eaaa
 folder-off	ed14
 folder-open	faf7
@@ -2507,9 +2525,12 @@ folder-question	f917
 folder-root	fd43
 folder-search	f918
 folder-share	f919
+folder-sparkle	102b0
 folder-star	f91a
+folder-stats	1029c
 folder-symlink	f91b
 folder-up	f91c
+folder-user	1029b
 folder-x	eaac
 folders	eaae
 folders-off	f133
@@ -2573,16 +2594,21 @@ gift	eb68
 gift-card	f3aa
 gift-off	f3f3
 git-branch	eab2
+git-branch-check	102af
 git-branch-deleted	f57d
+git-branch-x	102ae
 git-cherry-pick	f57e
 git-commit	eab3
 git-compare	eab4
 git-fork	eb8f
 git-merge	eab5
+git-merge-queue	102ad
 git-pull-request	eab6
 git-pull-request-closed	ef7f
 git-pull-request-conflict	10264
 git-pull-request-draft	efb7
+git-pull-request-locked	102ac
+git-pull-request-unlisted	102ab
 gizmo	f02b
 glass	eab8
 glass-champagne	fd9c
@@ -2596,6 +2622,8 @@ go-game	f512
 golf	ed8c
 golf-off	f13a
 gps	ed7a
+gpu	10299
+gpu-2	1029a
 gradienter	f3ab
 grain	ee92
 grape	10239
@@ -3005,6 +3033,8 @@ lego	eadc
 lego-off	f401
 lemon	ef10
 lemon-2	ef81
+lens-concave	102b9
+lens-convex	102b8
 letter-a	ec50
 letter-a-small	fcc7
 letter-b	ec51
@@ -3244,6 +3274,7 @@ map-pin-share	f795
 map-pin-star	f959
 map-pin-up	f95a
 map-pin-x	f95b
+map-pinned	10298
 map-pins	ed5e
 map-plus	fbcf
 map-question	fbd0
@@ -3319,6 +3350,7 @@ medical-cross-off	f160
 medicine-syrup	ef63
 meeple	f514
 melon	fc7a
+memory	102b7
 menorah	f58c
 menu	eaeb
 menu-2	ec42
@@ -3329,6 +3361,7 @@ menu-order	f5f5
 mesh	10201
 message	eaef
 message-2	eaec
+message-2-ai	102aa
 message-2-bolt	f95c
 message-2-cancel	f95d
 message-2-check	f95e
@@ -3346,9 +3379,11 @@ message-2-plus	f967
 message-2-question	f968
 message-2-search	f969
 message-2-share	f077
+message-2-sparkle	102a9
 message-2-star	f96a
 message-2-up	f96b
 message-2-x	f96c
+message-ai	102a8
 message-bolt	f96d
 message-cancel	f96e
 message-chatbot	f38a
@@ -3395,6 +3430,7 @@ message-reply	fd4d
 message-report	ec9b
 message-search	f98c
 message-share	f078
+message-sparkle	102a7
 message-star	f98d
 message-up	f98e
 message-user	fec4
@@ -3432,6 +3468,7 @@ mist	ec30
 mist-off	f410
 mobiledata	f9f5
 mobiledata-off	f9f4
+model-ai	102a6
 moneybag	f506
 moneybag-edit	1013d
 moneybag-heart	1013c
@@ -3724,6 +3761,9 @@ olympics-off	f416
 om	f58d
 omega	eb97
 option	1019f
+orbit	10296
+orbit-vertical	10297
+orbits	10295
 outbound	f249
 outlet	ebd7
 oval	f02e
@@ -3765,6 +3805,7 @@ paywall	fd7e
 pdf	f7ac
 peace	ecbe
 pencil	eb04
+pencil-ai	102a5
 pencil-bolt	fbfd
 pencil-cancel	fbfe
 pencil-check	fbff
@@ -4093,6 +4134,8 @@ rectangular-prism-off	fab3
 rectangular-prism-plus	fab4
 recycle	eb9b
 recycle-off	f18c
+reduce-motion	10294
+reference-image	10293
 refresh	eb13
 refresh-alert	ed57
 refresh-dot	efbf
@@ -4259,6 +4302,7 @@ scuba-mask-off	f428
 sdk	f3af
 search	eb1c
 search-off	f19c
+secret-phrases	10292
 section	eed5
 section-sign	f019
 seeding	ed51
@@ -4510,6 +4554,8 @@ square-chevrons-left	f64c
 square-chevrons-right	f64d
 square-chevrons-up	f64e
 square-dashed	100bb
+square-dashed-top-solid	102b6
+square-dashed-x	102b5
 square-dot	ed59
 square-f0	f526
 square-f1	f527
@@ -4641,11 +4687,15 @@ stack-2	eef7
 stack-3	ef9d
 stack-back	fd26
 stack-backward	fd27
+stack-check	102a4
 stack-forward	fd28
 stack-front	fd29
 stack-middle	fd2a
+stack-minus	102a3
+stack-plus	102a2
 stack-pop	f234
 stack-push	f235
+stack-x	102a1
 stairs	eca6
 stairs-down	eca4
 stairs-up	eca5
@@ -4665,6 +4715,7 @@ stethoscope	edbe
 stethoscope-off	f432
 sticker	eb2f
 sticker-2	fd3d
+sticker-smile	10291
 stopwatch	ff9b
 storm	f24c
 storm-off	f433
@@ -4913,6 +4964,7 @@ trending-up-2	edc3
 trending-up-3	edc4
 trending-up-down	101fb
 triangle	eb44
+triangle-dashed	102b4
 triangle-inverted	f01d
 triangle-minus	fc9b
 triangle-minus-2	fc9a
@@ -5039,6 +5091,8 @@ virus-off	ed66
 virus-search	ed67
 vocabulary	ef1e
 vocabulary-off	f43b
+voice	1028f
+voice-2	10290
 volcano	f79c
 volume	eb51
 volume-2	eb4f

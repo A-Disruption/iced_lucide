@@ -265,6 +265,7 @@ approval-delegation	f84a
 approval-delegation-off	f2c5
 apps	e5c3
 apps-outage	e7cc
+apps-plus	ffea7
 aq	f55a
 aq-indoor	f55b
 ar-on-you	ef7c
@@ -728,6 +729,7 @@ car-lock	f336
 car-mirror-heat	f335
 car-rental	ea55
 car-repair	ea56
+car-seat-off	ffebe
 car-tag	f4e3
 card-giftcard	e8f6
 card-membership	e8f7
@@ -776,6 +778,7 @@ chat-bubble	e0cb
 chat-bubble-off	fffbb
 chat-bubble-outline	e0cb
 chat-dashed	eeed
+chat-display	ffeac
 chat-error	f7ac
 chat-info	f52b
 chat-paste-go	f6bd
@@ -856,6 +859,7 @@ close-small	f508
 closed-caption	e996
 closed-caption-add	f4ae
 closed-caption-disabled	f1dc
+closed-caption-display	ffeab
 closed-caption-off	e996
 cloud	f15c
 cloud-alert	f3cc
@@ -1102,6 +1106,7 @@ developer-mode-tv	e874
 device-band	f2f5
 device-hub	e335
 device-reset	e8b3
+device-swoosh-star	ffeb8
 device-thermostat	e1ff
 device-unknown	f2e1
 devices	e326
@@ -1157,6 +1162,7 @@ dishwasher	e9a0
 dishwasher-gen	e832
 display-add	ffed2
 display-external-input	f7e7
+display-group	ffeaa
 display-settings	eb97
 distance	f6ea
 diversity-1	f8d7
@@ -1184,6 +1190,7 @@ docs-add-on	f0c2
 docs-apps-script	f0c3
 document-scanner	e5fa
 document-search	f385
+document-share	ffea6
 domain	e7ee
 domain-add	eb62
 domain-disabled	e0ef
@@ -1270,6 +1277,7 @@ edit-attributes	e578
 edit-audio	f42d
 edit-calendar	e742
 edit-document	f88c
+edit-line	ffea5
 edit-location	e568
 edit-location-alt	e1c5
 edit-note	e745
@@ -1476,6 +1484,7 @@ filter-alt	ef4f
 filter-alt-off	eb32
 filter-arrow-right	f3d1
 filter-b-and-w	e3db
+filter-cancel	ffea4
 filter-center-focus	e3dc
 filter-drama	e3dd
 filter-frames	e3de
@@ -1484,6 +1493,7 @@ filter-list	e152
 filter-list-alt	e94e
 filter-list-off	eb57
 filter-none	e3e0
+filter-plus	ffea3
 filter-retrolux	e3e1
 filter-tilt-shift	e3e2
 filter-vintage	e3e3
@@ -1671,6 +1681,7 @@ fullscreen	e5d0
 fullscreen-exit	e5d1
 fullscreen-portrait	f45a
 function	f866
+function-search	ffea2
 functions	e24a
 funicular	f477
 g-mobiledata	f010
@@ -1777,6 +1788,7 @@ grid-view	e9b0
 grocery	ef97
 group	ea21
 group-add	e7f0
+group-eye	ffea1
 group-off	e747
 group-remove	e7ad
 group-search	f3ce
@@ -2236,10 +2248,14 @@ login	ea77
 logo-dev	ead6
 logout	e9ba
 looks	e3fc
+looks-0	ffe97
 looks-3	e3fb
 looks-4	e3fd
 looks-5	e3fe
 looks-6	e3ff
+looks-7	ffe9a
+looks-8	ffe99
+looks-9	ffe98
 looks-one	e400
 looks-two	e401
 loop	e863
@@ -2294,7 +2310,9 @@ mark-email-read	f18c
 mark-email-unread	f18a
 mark-unread-chat-alt	eb9d
 markdown	f552
+markdown-convert	ffea0
 markdown-copy	f553
+markdown-document	ffe9f
 markdown-paste	f554
 markunread	e159
 markunread-mailbox	e89b
@@ -2406,6 +2424,7 @@ mobile-sound	f2e8
 mobile-sound-2	f318
 mobile-sound-off	f7aa
 mobile-speaker	f320
+mobile-tap	ffeb2
 mobile-text	f2eb
 mobile-text-2	f2e6
 mobile-theft	f2a9
@@ -2792,6 +2811,8 @@ pentagon	eb50
 people	ea21
 people-alt	ea21
 people-outline	ea21
+people-size-decrease	ffeb1
+people-size-increase	ffeb0
 percent	eb58
 percent-discount	f244
 performance-max	e51a
@@ -3346,6 +3367,7 @@ share-off	f6cb
 share-reviews	f8a4
 share-windows	f613
 shaved-ice	f225
+sheets-column-swap	ffe9d
 sheets-rtl	f823
 shelf-auto-hide	f703
 shelf-position	f702
@@ -3499,10 +3521,12 @@ space-dashboard	e66b
 space-dashboard-2	fff8c
 spatial-audio	ebeb
 spatial-audio-off	ebe8
+spatial-gallery	ffeb6
 spatial-speaker	f4cf
 spatial-tracking	ebea
 speaker	e32d
 speaker-2	fff71
+speaker-3	ffeb7
 speaker-group	e32e
 speaker-notes	e8cd
 speaker-notes-off	e92a
@@ -3615,6 +3639,7 @@ stay-current-landscape	ed3e
 stay-current-portrait	e7ba
 stay-primary-landscape	ed3e
 stay-primary-portrait	f2d3
+steering-wheel-cool	ffebd
 steering-wheel-heat	f32b
 step	f6fe
 step-into	f701
@@ -3778,6 +3803,7 @@ tamper-detection-on	f8c8
 tap-and-play	f2cc
 tapas	f1e9
 target	e719
+target-check	ffeb3
 task	f075
 task-alt	e2e6
 tatami-seat	ef33

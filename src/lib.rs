@@ -110,8 +110,8 @@
 //!     app.run()
 //! }
 //!
-//! fn view(&self) -> iced::Element<'_, ()> {
-//!     iced::widget::row![icon::edit(), icon::save(), icon::github()].into()
+//! fn view(&self) -> impl iced::Widget<()> + '_ {
+//!     iced::widget::row![icon::edit(), icon::save(), icon::github()]
 //! }
 //! ```
 //!

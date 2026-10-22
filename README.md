@@ -162,10 +162,8 @@ fn main() -> iced::Result {
     app.run()
 }
 
-fn view(&self) -> iced::Element<'_, ()> {
-    iced::widget::row![icon::edit(), icon::save(), icon::github()]
-        .spacing(10)
-        .into()
+fn view(&self) -> impl iced::Widget<()> + '_ {
+    iced::widget::row![icon::edit(), icon::save(), icon::github()].spacing(10)
 }
 ```
 
