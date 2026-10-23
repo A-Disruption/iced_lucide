@@ -100,15 +100,18 @@ fn main() {
 ///
 /// xz rather than the gzip `cargo package` applies on its own: it takes about
 /// a fifth off these fonts, which is the room the crate needs under the
-/// crates.io upload limit. CRC32 keeps the stream to what the build script's
-/// pure-Rust decoder (`lzma-rs`) handles.
+/// crates.io upload limit. The encoder is pure Rust, so refreshing the icons
+/// needs no C toolchain. CRC32 keeps the stream to what the build script's
+/// decoder (`lzma-rs`) handles.
 fn compress_font(font: &[u8]) -> Result<Vec<u8>, String> {
-    use liblzma::stream::{Check, PRESET_EXTREME, Stream};
+    use lzma_rust2::{CheckType, XzOptions, XzWriter};
     use std::io::Write;
 
-    let stream = Stream::new_easy_encoder(9 | PRESET_EXTREME, Check::Crc32)
-        .map_err(|error| format!("xz encoder: {error}"))?;
-    let mut encoder = liblzma::write::XzEncoder::new_stream(Vec::new(), stream);
+    let mut options = XzOptions::with_preset(9);
+    options.set_check_sum_type(CheckType::Crc32);
+
+    let mut encoder =
+        XzWriter::new(Vec::new(), options).map_err(|error| format!("xz encoder: {error}"))?;
 
     encoder
         .write_all(font)
