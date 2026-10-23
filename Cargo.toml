@@ -61,6 +61,10 @@ all = [
   "fluent_filled",
 ]
 
+# Unpacks the xz-compressed fonts in `assets/`; see `build.rs`.
+[build-dependencies]
+lzma-rs = "0.3"
+
 [dependencies]
 sha2 = "0.11.0"
 serde = { version = "1.0.229", features = ["derive"] }

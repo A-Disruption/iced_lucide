@@ -4,6 +4,9 @@
 //!
 //! Each family is gated behind its Cargo feature, so a build only pays for
 //! the fonts it asked for: a disabled family's assets are never embedded.
+//!
+//! The fonts are stored xz-compressed in `assets/`; `build.rs` unpacks the
+//! enabled ones into `OUT_DIR`, which is where they are embedded from.
 
 use crate::Family;
 
@@ -17,7 +20,7 @@ pub(crate) const LUCIDE: Family = Family {
     file_stem: "lucide",
     browse_url: "https://lucide.dev/icons",
     license: "ISC",
-    font: include_bytes!("../assets/lucide/lucide.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/lucide.ttf")),
     index: include_str!("../assets/lucide/icons.idx"),
 };
 
@@ -34,7 +37,7 @@ pub(crate) const BOOTSTRAP: Family = Family {
     file_stem: "bootstrap-icons",
     browse_url: "https://icons.getbootstrap.com",
     license: "MIT",
-    font: include_bytes!("../assets/bootstrap/bootstrap-icons.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/bootstrap-icons.ttf")),
     index: include_str!("../assets/bootstrap/icons.idx"),
 };
 
@@ -50,7 +53,7 @@ pub(crate) const CODICON: Family = Family {
     file_stem: "codicon",
     browse_url: "https://microsoft.github.io/vscode-codicons/dist/codicon.html",
     license: "CC-BY-4.0",
-    font: include_bytes!("../assets/codicon/codicon.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/codicon.ttf")),
     index: include_str!("../assets/codicon/icons.idx"),
 };
 
@@ -67,7 +70,7 @@ pub(crate) const DEVICON: Family = Family {
     file_stem: "devicon",
     browse_url: "https://devicon.dev",
     license: "MIT",
-    font: include_bytes!("../assets/devicon/devicon.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/devicon.ttf")),
     index: include_str!("../assets/devicon/icons.idx"),
 };
 
@@ -85,7 +88,7 @@ pub(crate) const FA_SOLID: Family = Family {
     file_stem: "fa-solid-900",
     browse_url: "https://fontawesome.com/icons/packs/classic",
     license: "CC-BY-4.0 (icons), OFL-1.1 (fonts)",
-    font: include_bytes!("../assets/fa-solid/fa-solid-900.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/fa-solid-900.ttf")),
     index: include_str!("../assets/fa-solid/icons.idx"),
 };
 
@@ -99,7 +102,7 @@ pub(crate) const FA_REGULAR: Family = Family {
     file_stem: "fa-regular-400",
     browse_url: "https://fontawesome.com/icons/packs/classic",
     license: "CC-BY-4.0 (icons), OFL-1.1 (fonts)",
-    font: include_bytes!("../assets/fa-regular/fa-regular-400.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/fa-regular-400.ttf")),
     index: include_str!("../assets/fa-regular/icons.idx"),
 };
 
@@ -116,7 +119,7 @@ pub(crate) const FA_BRANDS: Family = Family {
     file_stem: "fa-brands-400",
     browse_url: "https://fontawesome.com/icons/packs/classic",
     license: "CC-BY-4.0 (icons), OFL-1.1 (fonts)",
-    font: include_bytes!("../assets/fa-brands/fa-brands-400.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/fa-brands-400.ttf")),
     index: include_str!("../assets/fa-brands/icons.idx"),
 };
 
@@ -134,7 +137,7 @@ pub(crate) const NERDFONTS: Family = Family {
     file_stem: "symbols-nerd-font",
     browse_url: "https://www.nerdfonts.com/cheat-sheet",
     license: "MIT",
-    font: include_bytes!("../assets/nerdfonts/symbols-nerd-font.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/symbols-nerd-font.ttf")),
     index: include_str!("../assets/nerdfonts/icons.idx"),
 };
 
@@ -153,7 +156,7 @@ pub(crate) const OCTICONS: Family = Family {
     file_stem: "octicons",
     browse_url: "https://primer.style/octicons",
     license: "MIT",
-    font: include_bytes!("../assets/octicons/octicons.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/octicons.ttf")),
     index: include_str!("../assets/octicons/icons.idx"),
 };
 
@@ -167,7 +170,7 @@ pub(crate) const POMICONS: Family = Family {
     file_stem: "pomicons",
     browse_url: "https://github.com/gabrielelana/pomicons",
     license: "See vendored LICENSE",
-    font: include_bytes!("../assets/pomicons/pomicons.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/pomicons.ttf")),
     index: include_str!("../assets/pomicons/icons.idx"),
 };
 
@@ -184,7 +187,7 @@ pub(crate) const MATERIAL_SYMBOLS: Family = Family {
     file_stem: "material-symbols-outlined",
     browse_url: "https://fonts.google.com/icons",
     license: "Apache-2.0",
-    font: include_bytes!("../assets/material-symbols/material-symbols-outlined.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/material-symbols-outlined.ttf")),
     index: include_str!("../assets/material-symbols/icons.idx"),
 };
 
@@ -200,7 +203,7 @@ pub(crate) const MATERIAL_DESIGN_ICONS: Family = Family {
     file_stem: "materialdesignicons",
     browse_url: "https://pictogrammers.com/library/mdi/",
     license: "Apache-2.0",
-    font: include_bytes!("../assets/material-design-icons/materialdesignicons.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/materialdesignicons.ttf")),
     index: include_str!("../assets/material-design-icons/icons.idx"),
 };
 
@@ -217,7 +220,7 @@ pub(crate) const PHOSPHOR: Family = Family {
     file_stem: "phosphor",
     browse_url: "https://phosphoricons.com",
     license: "MIT",
-    font: include_bytes!("../assets/phosphor/phosphor.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/phosphor.ttf")),
     index: include_str!("../assets/phosphor/icons.idx"),
 };
 
@@ -231,7 +234,7 @@ pub(crate) const TABLER: Family = Family {
     file_stem: "tabler-icons",
     browse_url: "https://tabler.io/icons",
     license: "MIT",
-    font: include_bytes!("../assets/tabler/tabler-icons.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/tabler-icons.ttf")),
     index: include_str!("../assets/tabler/icons.idx"),
 };
 
@@ -248,7 +251,7 @@ pub(crate) const FLUENT: Family = Family {
     file_stem: "fluent-system-icons",
     browse_url: "https://github.com/microsoft/fluentui-system-icons",
     license: "MIT",
-    font: include_bytes!("../assets/fluent/fluent-system-icons.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/fluent-system-icons.ttf")),
     index: include_str!("../assets/fluent/icons.idx"),
 };
 
@@ -265,7 +268,7 @@ pub(crate) const SIMPLE_ICONS: Family = Family {
     file_stem: "simple-icons",
     browse_url: "https://simpleicons.org",
     license: "CC0-1.0",
-    font: include_bytes!("../assets/simple-icons/simple-icons.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/simple-icons.ttf")),
     index: include_str!("../assets/simple-icons/icons.idx"),
 };
 
@@ -282,7 +285,7 @@ pub(crate) const BOXICONS: Family = Family {
     file_stem: "boxicons",
     browse_url: "https://boxicons.com",
     license: "MIT",
-    font: include_bytes!("../assets/boxicons/boxicons.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/boxicons.ttf")),
     index: include_str!("../assets/boxicons/icons.idx"),
 };
 
@@ -296,7 +299,7 @@ pub(crate) const MATERIAL_SYMBOLS_ROUNDED: Family = Family {
     file_stem: "material-symbols-rounded",
     browse_url: "https://fonts.google.com/icons",
     license: "Apache-2.0",
-    font: include_bytes!("../assets/material-symbols-rounded/material-symbols-rounded.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/material-symbols-rounded.ttf")),
     index: include_str!("../assets/material-symbols-rounded/icons.idx"),
 };
 
@@ -310,7 +313,7 @@ pub(crate) const MATERIAL_SYMBOLS_SHARP: Family = Family {
     file_stem: "material-symbols-sharp",
     browse_url: "https://fonts.google.com/icons",
     license: "Apache-2.0",
-    font: include_bytes!("../assets/material-symbols-sharp/material-symbols-sharp.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/material-symbols-sharp.ttf")),
     index: include_str!("../assets/material-symbols-sharp/icons.idx"),
 };
 
@@ -324,7 +327,7 @@ pub(crate) const PHOSPHOR_THIN: Family = Family {
     file_stem: "phosphor-thin",
     browse_url: "https://phosphoricons.com",
     license: "MIT",
-    font: include_bytes!("../assets/phosphor-thin/phosphor-thin.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/phosphor-thin.ttf")),
     index: include_str!("../assets/phosphor-thin/icons.idx"),
 };
 
@@ -338,7 +341,7 @@ pub(crate) const PHOSPHOR_LIGHT: Family = Family {
     file_stem: "phosphor-light",
     browse_url: "https://phosphoricons.com",
     license: "MIT",
-    font: include_bytes!("../assets/phosphor-light/phosphor-light.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/phosphor-light.ttf")),
     index: include_str!("../assets/phosphor-light/icons.idx"),
 };
 
@@ -352,7 +355,7 @@ pub(crate) const PHOSPHOR_BOLD: Family = Family {
     file_stem: "phosphor-bold",
     browse_url: "https://phosphoricons.com",
     license: "MIT",
-    font: include_bytes!("../assets/phosphor-bold/phosphor-bold.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/phosphor-bold.ttf")),
     index: include_str!("../assets/phosphor-bold/icons.idx"),
 };
 
@@ -366,7 +369,7 @@ pub(crate) const PHOSPHOR_FILL: Family = Family {
     file_stem: "phosphor-fill",
     browse_url: "https://phosphoricons.com",
     license: "MIT",
-    font: include_bytes!("../assets/phosphor-fill/phosphor-fill.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/phosphor-fill.ttf")),
     index: include_str!("../assets/phosphor-fill/icons.idx"),
 };
 
@@ -384,7 +387,7 @@ pub(crate) const PHOSPHOR_DUOTONE: Family = Family {
     file_stem: "phosphor-duotone",
     browse_url: "https://phosphoricons.com",
     license: "MIT",
-    font: include_bytes!("../assets/phosphor-duotone/phosphor-duotone.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/phosphor-duotone.ttf")),
     index: include_str!("../assets/phosphor-duotone/icons.idx"),
 };
 
@@ -400,7 +403,7 @@ pub(crate) const TABLER_FILLED: Family = Family {
     file_stem: "tabler-icons-filled",
     browse_url: "https://tabler.io/icons",
     license: "MIT",
-    font: include_bytes!("../assets/tabler-filled/tabler-icons-filled.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/tabler-icons-filled.ttf")),
     index: include_str!("../assets/tabler-filled/icons.idx"),
 };
 
@@ -416,7 +419,7 @@ pub(crate) const FLUENT_FILLED: Family = Family {
     file_stem: "fluent-system-icons-filled",
     browse_url: "https://github.com/microsoft/fluentui-system-icons",
     license: "MIT",
-    font: include_bytes!("../assets/fluent-filled/fluent-system-icons-filled.ttf"),
+    font: include_bytes!(concat!(env!("OUT_DIR"), "/fonts/fluent-system-icons-filled.ttf")),
     index: include_str!("../assets/fluent-filled/icons.idx"),
 };
 

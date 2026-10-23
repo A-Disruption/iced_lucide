@@ -7,6 +7,8 @@ description = "Maintainer tool: fetches upstream icon fonts and normalises them 
 
 [dependencies]
 flate2 = "1"
+# Compresses the vendored fonts; see `compress_font`.
+liblzma = "0.4"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 ttf-parser = "0.25"

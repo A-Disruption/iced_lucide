@@ -89,6 +89,33 @@ fn main() {
     let registry = root.join("src/families.rs");
     fs::write(&registry, registry::render()).expect("write src/families.rs");
     println!("\nwrote {}", registry.display());
+
+    let fonts = root.join("build/fonts.rs");
+    fs::create_dir_all(root.join("build")).expect("create build/");
+    fs::write(&fonts, registry::render_fonts()).expect("write build/fonts.rs");
+    println!("wrote {}", fonts.display());
+}
+
+/// Compresses a font as xz at the strongest preset.
+///
+/// xz rather than the gzip `cargo package` applies on its own: it takes about
+/// a fifth off these fonts, which is the room the crate needs under the
+/// crates.io upload limit. CRC32 keeps the stream to what the build script's
+/// pure-Rust decoder (`lzma-rs`) handles.
+fn compress_font(font: &[u8]) -> Result<Vec<u8>, String> {
+    use liblzma::stream::{Check, PRESET_EXTREME, Stream};
+    use std::io::Write;
+
+    let stream = Stream::new_easy_encoder(9 | PRESET_EXTREME, Check::Crc32)
+        .map_err(|error| format!("xz encoder: {error}"))?;
+    let mut encoder = liblzma::write::XzEncoder::new_stream(Vec::new(), stream);
+
+    encoder
+        .write_all(font)
+        .map_err(|error| format!("compress font: {error}"))?;
+    encoder
+        .finish()
+        .map_err(|error| format!("compress font: {error}"))
 }
 
 fn vendor(source: &Source, root: &Path, cache: &Path, offline: bool) -> Result<String, String> {
@@ -154,8 +181,18 @@ fn vendor(source: &Source, root: &Path, cache: &Path, offline: bool) -> Result<S
     let directory = root.join("assets").join(source.id);
     fs::create_dir_all(&directory).map_err(|error| format!("create {directory:?}: {error}"))?;
 
-    let font_path = directory.join(format!("{}.ttf", source.file_stem));
-    fs::write(&font_path, &vendored).map_err(|error| format!("write {font_path:?}: {error}"))?;
+    // Stored compressed: plain, the fonts would push the published crate over
+    // crates.io's upload limit. `build.rs` unpacks the enabled families.
+    let font_path = directory.join(format!("{}.ttf.xz", source.file_stem));
+    let compressed = compress_font(&vendored)?;
+    fs::write(&font_path, &compressed).map_err(|error| format!("write {font_path:?}: {error}"))?;
+
+    // A plain copy from before the fonts were compressed would otherwise be
+    // published alongside the compressed one.
+    let plain = directory.join(format!("{}.ttf", source.file_stem));
+    if plain.exists() {
+        fs::remove_file(&plain).map_err(|error| format!("remove {plain:?}: {error}"))?;
+    }
 
     fs::write(directory.join("icons.idx"), render_index(source, &icons))
         .map_err(|error| format!("write icons.idx: {error}"))?;
