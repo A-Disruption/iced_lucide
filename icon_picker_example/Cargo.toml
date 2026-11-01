@@ -21,4 +21,4 @@ iced_lucide = { workspace = true, features = ["all"] }
 
 [dev-dependencies]
 # Used to prove the exported definition is valid TOML.
-toml = "0.9"
+toml = "1.1"
