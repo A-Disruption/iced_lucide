@@ -2725,7 +2725,7 @@ version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c2499c2d826531388872b2268718aed907a39bd785ab0dcfe57fab26283f92e"
 dependencies = [
- "skrifa 0.44.0",
+ "skrifa 0.42.1",
  "yazi",
  "zeno",
 ]
@@ -3541,7 +3541,7 @@ dependencies = [
 [[package]]
 name = "widgets"
 version = "0.1.0"
-source = "git+https://github.com/A-Disruption/widgets#46e20e0ba787a990e5751fc04281a83ff5ce7eb2"
+source = "git+https://github.com/A-Disruption/widgets#2a0aa24ff091eaca352f82da1548ff4f5796786f"
 dependencies = [
  "iced",
 ]
