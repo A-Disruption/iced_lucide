@@ -20,20 +20,20 @@ it asks for.
 
 | Feature | Set | Identifier(s) | Icons | License |
 |---|---|---|---:|---|
-| `lucide` *(default)* | [Lucide](https://lucide.dev/icons) | `lucide` | 2048 | ISC |
+| `lucide` *(default)* | [Lucide](https://lucide.dev/icons) | `lucide` | 2403 | ISC |
 | `bootstrap` | [Bootstrap Icons](https://icons.getbootstrap.com) | `bootstrap` | 2078 | MIT |
 | `codicon` | [VS Code Codicons](https://microsoft.github.io/vscode-codicons/dist/codicon.html) | `codicon` | 746 | CC-BY-4.0 |
-| `devicon` | [Devicon](https://devicon.dev) | `devicon` | 1491 | MIT |
+| `devicon` | [Devicon](https://devicon.dev) | `devicon` | 1680 | MIT |
 | `fontawesome` | [Font Awesome Free](https://fontawesome.com/icons/packs/classic) | `fa-solid`, `fa-regular`, `fa-brands` | 2054 | CC-BY-4.0 / OFL-1.1 |
 | `nerdfonts` | [Nerd Fonts](https://www.nerdfonts.com) | `nerdfonts` | 10995 | MIT |
 | `octicons` | [Octicons](https://primer.style/octicons) | `octicons` | 310 | MIT |
 | `pomicons` | [Pomicons](https://github.com/gabrielelana/pomicons) | `pomicons` | 11 | see vendored `LICENSE` |
-| `material_symbols` | [Material Symbols](https://fonts.google.com/icons) | `material-symbols` | 4275 | Apache-2.0 |
+| `material_symbols` | [Material Symbols](https://fonts.google.com/icons) | `material-symbols` | 4304 | Apache-2.0 |
 | `material_design_icons` | [Material Design Icons](https://pictogrammers.com/library/mdi/) | `material-design-icons` | 7447 | Apache-2.0 |
 | `phosphor` | [Phosphor](https://phosphoricons.com) | `phosphor` | 1530 | MIT |
-| `tabler` | [Tabler Icons](https://tabler.io/icons) | `tabler` | 5193 | MIT |
-| `fluent` | [Fluent System Icons](https://github.com/microsoft/fluentui-system-icons) | `fluent` | 9708 | MIT |
-| `simple_icons` | [Simple Icons](https://simpleicons.org) | `simple-icons` | 3457 | CC0-1.0 |
+| `tabler` | [Tabler Icons](https://tabler.io/icons) | `tabler` | 5555 | MIT |
+| `fluent` | [Fluent System Icons](https://github.com/microsoft/fluentui-system-icons) | `fluent` | 9832 | MIT |
+| `simple_icons` | [Simple Icons](https://simpleicons.org) | `simple-icons` | 3472 | CC0-1.0 |
 | `boxicons` | [Boxicons](https://boxicons.com) | `boxicons` | 1634 | MIT |
 
 ### Extra weights and styles
@@ -44,10 +44,10 @@ face, and you download only the weights you actually use.
 
 | Feature | Adds | Icons |
 |---|---|---:|
-| `material_symbols_styles` | `material-symbols-rounded`, `material-symbols-sharp` | 8550 |
+| `material_symbols_styles` | `material-symbols-rounded`, `material-symbols-sharp` | 8608 |
 | `phosphor_weights` | `phosphor-thin`, `-light`, `-bold`, `-fill`, `-duotone` | 7632 |
 | `tabler_filled` | `tabler-filled` | 1057 |
-| `fluent_filled` | `fluent-filled` | 9833 |
+| `fluent_filled` | `fluent-filled` | 9955 |
 
 These are separate *families*, not weights on an existing one:
 
@@ -60,7 +60,7 @@ That is deliberate. Naming the face means asking for one that is not enabled is
 a build error, where `Font::new("phosphor").weight(Bold)` against a family that
 only has Regular loaded would quietly render Regular instead.
 
-That is **80,049 icons** across 26 families. Nothing is enabled but Lucide
+That is **81,303 icons** across 26 families. Nothing is enabled but Lucide
 unless you ask for it.
 
 Enable what you need:
@@ -294,7 +294,7 @@ cargo run -p icon_picker_example   # browse all 26 families
 ```
 
 `icon_picker_example` is the one to reach for when deciding what to use: search
-across all 80,049 icons, filter by family, click to collect them in a side
+across all 81,303 icons, filter by family, click to collect them in a side
 panel, and recolour the lot. The family and colour dropdowns are built on the
 [`popover`](https://github.com/A-Disruption/widgets) widget.
 

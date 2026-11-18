@@ -48,7 +48,7 @@
 //! asking for one that is not enabled fails the build instead of quietly
 //! falling back to the regular weight.
 //!
-//! Twenty-six families, 80,049 icons. Several carry caveats — Material Symbols
+//! Twenty-six families, 81,303 icons. Several carry caveats — Material Symbols
 //! is vendored from its variable font's default instance, Fluent names keep
 //! their pixel size, Boxicons prefixes its solid and logo styles — which the
 //! README sets out in full.

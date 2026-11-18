@@ -207,6 +207,7 @@ app-folder-24	f123
 app-folder-28	e059
 app-folder-32	e05a
 app-folder-48	e05b
+app-folder-hint-20	f0f03
 app-generic-20	e05c
 app-generic-24	f124
 app-generic-32	efb9
@@ -300,10 +301,13 @@ arrow-bidirectional-left-right-16	f02a0
 arrow-bidirectional-left-right-20	f02a1
 arrow-bidirectional-left-right-24	f02a2
 arrow-bidirectional-left-right-28	f02a3
+arrow-bidirectional-left-right-32	f0f19
 arrow-bidirectional-up-down-12	e082
 arrow-bidirectional-up-down-16	e083
 arrow-bidirectional-up-down-20	e084
 arrow-bidirectional-up-down-24	e085
+arrow-bidirectional-up-down-28	f0f1a
+arrow-bidirectional-up-down-32	f0f1b
 arrow-bounce-12	f0740
 arrow-bounce-16	e086
 arrow-bounce-20	e087
@@ -600,6 +604,7 @@ arrow-repeat-all-16	f170
 arrow-repeat-all-20	f171
 arrow-repeat-all-24	f172
 arrow-repeat-all-28	f0729
+arrow-repeat-all-32	f0f1c
 arrow-repeat-all-48	f072a
 arrow-repeat-all-off-16	f173
 arrow-repeat-all-off-20	f174
@@ -858,6 +863,12 @@ autopilot-20	f0cdc
 autopilot-24	f0d1a
 autopilot-28	f0d1b
 autopilot-32	f0d1c
+autopilot-face-16	f0f1d
+autopilot-face-20	f0f1e
+autopilot-face-24	f0f1f
+autopilot-face-28	f0f20
+autopilot-face-32	f0f21
+autopilot-face-48	f0f22
 autosum-16	f069
 autosum-20	f1af
 autosum-24	f1b0
@@ -1221,6 +1232,7 @@ box-multiple-checkmark-20	e1cd
 box-multiple-checkmark-24	e1ce
 box-multiple-search-20	e1cf
 box-multiple-search-24	e1d0
+box-question-mark-20	f0f04
 box-search-16	f6a7
 box-search-20	e1d1
 box-search-24	e1d2
@@ -1472,6 +1484,7 @@ calendar-assistant-24	f218
 calendar-cancel-16	e240
 calendar-cancel-20	f219
 calendar-cancel-24	f21a
+calendar-cancel-32	f0f05
 calendar-chat-16	f0c3a
 calendar-chat-20	e241
 calendar-chat-24	e242
@@ -1507,6 +1520,7 @@ calendar-data-bar-32	f0a6d
 calendar-date-20	f0289
 calendar-date-24	f028a
 calendar-date-28	f028b
+calendar-date-32	f0f23
 calendar-day-16	e244
 calendar-day-20	f222
 calendar-day-24	f223
@@ -1755,6 +1769,7 @@ camera-sparkles-20	f026
 camera-sparkles-24	f027
 camera-switch-20	e2a2
 camera-switch-24	f25a
+card-ui-16	f0f24
 card-ui-20	f0169
 card-ui-24	f016a
 card-ui-info-16	f0bf9
@@ -1763,6 +1778,8 @@ card-ui-info-24	f0bfb
 card-ui-portrait-flip-16	f05f9
 card-ui-portrait-flip-20	f05fa
 card-ui-portrait-flip-24	f05fb
+card-ui-sparkle-16	f0f25
+card-ui-sparkle-20	f0f26
 caret-down-12	f25f
 caret-down-16	f260
 caret-down-20	f261
@@ -2551,9 +2568,13 @@ color-fill-accent-32	f0bcc
 color-line-16	e3c5
 color-line-20	f2fb
 color-line-24	f2fc
+color-line-28	f0f06
+color-line-32	f0f07
 color-line-accent-16	e3c6
 color-line-accent-20	e3c7
 color-line-accent-24	e3c8
+color-line-accent-28	f0f08
+color-line-accent-32	f0f09
 color-off-20	f0cb4
 color-off-24	f0cb5
 color-off-28	f0cb6
@@ -2695,6 +2716,10 @@ conference-room-20	f318
 conference-room-24	f319
 conference-room-28	f31a
 conference-room-48	f31b
+conference-room-sparkle-16	f0f0a
+conference-room-sparkle-20	f0f0b
+conference-room-sparkle-24	f0f0c
+conference-room-sparkle-28	f0f0d
 connected-16	eeeb
 connected-20	eeec
 connected-24	f0791
@@ -3081,6 +3106,9 @@ desktop-cursor-28	e48e
 desktop-edit-16	e48f
 desktop-edit-20	e490
 desktop-edit-24	e491
+desktop-edit-28	f0f27
+desktop-edit-32	f0f28
+desktop-edit-48	f0f29
 desktop-flow-20	e492
 desktop-flow-24	e493
 desktop-keyboard-16	e494
@@ -3342,6 +3370,7 @@ document-endnote-24	f389
 document-error-16	f38a
 document-error-20	f38b
 document-error-24	f38c
+document-excel-20	f0f0e
 document-fit-16	f001f
 document-fit-20	f0020
 document-fit-24	f0021
@@ -3491,6 +3520,7 @@ document-person-16	f421
 document-person-20	e52b
 document-pill-20	e52c
 document-pill-24	e52d
+document-powerpoint-20	f0f0f
 document-print-20	f002e
 document-print-24	f002f
 document-print-28	f0030
@@ -4107,6 +4137,8 @@ folder-document-24	f0737
 folder-document-28	f0738
 folder-globe-16	f4b1
 folder-globe-20	e655
+folder-globe-24	f0f10
+folder-globe-28	f0f11
 folder-hint-20	f0c61
 folder-holder-20	f0c75
 folder-lightning-16	f01ec
@@ -4642,6 +4674,9 @@ home-add-24	f483
 home-checkmark-16	e713
 home-checkmark-20	e714
 home-checkmark-24	f484
+home-checkmark-28	f0f12
+home-checkmark-32	f0f13
+home-checkmark-48	f0f14
 home-database-20	e715
 home-database-24	eed5
 home-database-32	eed6
@@ -5077,8 +5112,13 @@ line-horizontal-3-32	f0767
 line-horizontal-3-48	f0768
 line-horizontal-4-16	f012b
 line-horizontal-4-20	f005f
+line-horizontal-4-24	f0f2a
+line-horizontal-4-28	f0f2b
+line-horizontal-4-32	f0f2c
+line-horizontal-4-48	f0f2d
 line-horizontal-4-search-16	f012c
 line-horizontal-4-search-20	f0060
+line-horizontal-4-search-32	f0f2e
 line-horizontal-5-20	f4e2
 line-horizontal-5-error-20	e76d
 line-style-20	e76e
@@ -5359,6 +5399,8 @@ mail-off-24	e7ca
 mail-open-person-16	e7cb
 mail-open-person-20	e7cc
 mail-open-person-24	e7cd
+mail-open-person-28	f0f15
+mail-open-person-32	f0f16
 mail-pause-16	f5a6
 mail-pause-20	e7ce
 mail-prohibited-16	e7cf
@@ -7105,6 +7147,8 @@ save-copy-20	ea47
 save-copy-24	f683
 save-edit-20	ea48
 save-edit-24	ea49
+save-edit-28	f0f2f
+save-edit-32	f0f30
 save-image-20	ea4a
 save-multiple-16	f1d2
 save-multiple-20	ea4b
@@ -7215,6 +7259,9 @@ search-square-24	f694
 search-visual-16	ea82
 search-visual-20	ea83
 search-visual-24	ea84
+search-visual-28	f0f31
+search-visual-32	f0f32
+search-visual-48	f0f33
 seat-16	f04d9
 seat-20	f04da
 seat-24	f04db
@@ -9064,9 +9111,15 @@ textbox-settings-20	f55c
 textbox-settings-24	f57f
 thinking-20	f81b
 thinking-24	f81c
+threat-actor-16	f0f34
+threat-actor-20	f0f35
+threat-actor-24	f0f36
+threat-actor-28	f0f37
 thumb-dislike-16	ed77
 thumb-dislike-20	f81d
 thumb-dislike-24	f81e
+thumb-dislike-28	f0f17
+thumb-dislike-48	f0f18
 thumb-like-16	ed78
 thumb-like-20	f81f
 thumb-like-24	f820
